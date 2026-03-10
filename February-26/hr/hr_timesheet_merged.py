@@ -11,7 +11,6 @@ with open(CREDENTIAL_PATH) as f:
 # ================= LOGIN =================
 
 def login_page(page, env):
-
     username = cred[env]["admin"]["username"]
     password = cred[env]["admin"]["password"]
     link = cred[env]["link"]
@@ -29,10 +28,16 @@ def login_page(page, env):
 def approve_timesheet(page):
     page.get_by_role("link", name="Timesheet").click()
     page.locator("tr:first-child td:nth-child(4) a").click()
-    
+
     page.get_by_role("button", name="Approval").click()
 
-    checkbox = page.get_by_placeholder("1").first
+    # with page.expect_download() as download_info:
+    #     page.frame_locator("iframe").locator("cr-icon-button#save").click()
+
+    # download = download_info.value
+    # download.save_as("Downloaded_timesheet/" + download.suggested_filename)
+
+    checkbox = page.get_by_placeholder("1").nth(1)
     checkbox.scroll_into_view_if_needed()
     checkbox.check()
 
@@ -48,13 +53,23 @@ def reject_timesheet(page):
 
     page.get_by_role("button", name="Approval").click()
 
+    # page.locator("#plugin").wait_for()
+
+    # pdf_url = page.locator("#plugin").get_attribute("original-url")
+
+    # filename = pdf_url.split("/")[-1]
+
+    # response = page.request.get(pdf_url)
+
+    # with open(f"Downloaded_timesheet/{filename}", "wb") as f:
+    #     f.write(response.body())
+
     reject_checkbox = page.get_by_placeholder("1").nth(1)
     reject_checkbox.scroll_into_view_if_needed()
     reject_checkbox.check()
 
-    comment_box = page.locator("textarea[name=\"comment\"]")
-    comment_box.scroll_into_view_if_needed()
-    comment_box.fill("Rejected by Automation -D.")
+    comment_box = page.locator("textarea[name='comment']")
+    comment_box.fill("Timesheet has been Rejected by Automation -D.")
 
     page.get_by_role("button", name="Send").click()
     submit_stage(page)
@@ -70,7 +85,5 @@ def submit_stage(page):
 # ================= TEST =================
 
 def test_timesheet_action(page, env_config, action_config):
-
     login_page(page, env_config)
-
     action_config(page)

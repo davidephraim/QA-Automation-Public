@@ -1,6 +1,5 @@
 import re, json
 from pathlib import Path
-from playwright.sync_api import Playwright
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 CREDENTIAL_PATH = BASE_DIR / "credentials.json"
@@ -11,7 +10,6 @@ with open(CREDENTIAL_PATH) as fc:
 # ================= LOGIN =================
 
 def login_page(page, env):
-
     username = cred[env]["admin"]["username"]
     password = cred[env]["admin"]["password"]
     link = cred[env]["link"]
@@ -27,7 +25,6 @@ def login_page(page, env):
 # ================= REJECT =================
 
 def reject_leave(page, leave_config):
-
     target_leave = leave_config["target_leave"]
 
     page.locator("div").filter(has_text=re.compile(r"^Leave$")).first.click()
@@ -36,7 +33,7 @@ def reject_leave(page, leave_config):
     # search employee
     page.locator("input.search").fill("alaba")
 
-    page.wait_for_timeout(2000)
+    page.wait_for_timeout(1000)
 
     rows = page.locator("table tbody tr")
     count = rows.count()

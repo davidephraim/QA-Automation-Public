@@ -29,6 +29,8 @@ Supported system formats:
 * Sigmatech
 * InfoSys BRI
 * InfoSys CIMB
+* Mandiri Inhealth
+* Hypernet KFC
 
 ---
 
@@ -38,19 +40,21 @@ February-26/
 ├── employee/
 │   ├── File_test/
 │   │   └── img_dummy.png
+│   ├── __init__.py
 │   ├── conftest.py
-│   ├── leave_date.json
-│   ├── leave_merged.py
-│   └── timesheet_merged.py
+│   ├── employee_timesheet_merged.json
+│   ├── leave_date.py
+│   └── leave_merged.py
 │
 ├── hr/
 │   ├── cancel_leave.py
+│   ├── __init__.py
 │   ├── conftest.py
 │   ├── holiday_date.json
 │   ├── holiday_merged.py
 │   ├── leave_date.json
-│   ├── timesheet_merged.py
-│   └── holiday_date.json
+│   ├── hr_timesheet_merged.py
+│   └── set_format.json
 │
 ├── venv/
 ├── credentials.json
@@ -86,14 +90,16 @@ Available Environment (ENVIRONMENT)
 
 ## 👨‍💼 EMPLOYEE AUTOMATION
 ### ⏱ Timesheet
-File: employee/timesheet_merged.py
+📄 File: employee/timesheet_merged.py
 
 Available Timesheet Format (TIMESHEET_FORMAT)
-| Format    | Description    |
-| --------- | -------------- |
-| sigmatech | Sigmatech      |
-| bri       | InfoSys BRI    |
-| cimb      | InfoSys CIMB   |
+| Format    | Description      |
+| --------- | ---------------- |
+| sigmatech | Sigmatech        |
+| bri       | InfoSys BRI      |
+| cimb      | InfoSys CIMB     |
+| mandiri   | Mandiri Inhealth |
+| hypernet  | Hypernet         |
 
 
 Available Scenarios (TIMESHEET_PERIOD)
@@ -106,11 +112,11 @@ Available Scenarios (TIMESHEET_PERIOD)
 
 ▶ Run Example
 ```bash
-pytest employee\timesheet_merged.py --env=<ENVIRONMENT> --format=<TIMESHEET_FORMAT> --timesheet=<TIMESHEET_PERIOD>
+pytest employee\timesheet_merged.py --env=<ENVIRONMENT> --format=<TIMESHEET_FORMAT> --timesheet=<TIMESHEET_PERIOD> --headed
 ```
 
 ### 🌴 Leave
-File: employee/leave_merged.py
+📄 File: employee/leave_merged.py
 
 Available Leave Types (LEAVE_TYPES)
 - unpaid
@@ -129,7 +135,7 @@ pytest employee\leave_merged.py --env=<ENVIRONMENT> --leave=<LEAVE_TYPE> --date-
 
 ## 👩‍💼 HR AUTOMATION
 ### 📅 Holiday Management
-File: hr/holiday_merged.py
+📄 File: hr/holiday_merged.py
 
 Avaliable Holiday Types (HOLIDAY_TYPE)
 - public
@@ -147,7 +153,7 @@ pytest hr\holiday_merged.py --env=<ENVIRONMENT> --holiday=<HOLIDAY_TYPE> --date-
 ```
 
 ### ✅ Timesheet Approval
-File: hr/timesheet_merged.py
+📄 File: hr/timesheet_merged.py
 
 Avaliable Timesheet Actions (TIMESHEET_ACTION)
 - approve
@@ -159,7 +165,7 @@ pytest hr\Timesheet_Merged.py --env=<ENVIRONMENT> --action=<TIMESHEET_ACTION>
 ```
 
 ### ❌ Leave Cancellation
-File: hr/cancel_leave.py
+📄 File: hr/cancel_leave.py
 
 Available Leave Types (LEAVE_TYPES)
 - unpaid
@@ -184,4 +190,5 @@ pytest hr\Cancel-Leave.py --env=<ENVIRONMENT> --leave=<LEAVE_TYPE>
 | `--holiday`   | Holiday type                       |
 | `--action`    | approve / reject                   |
 | `--headed`    | Run browser in UI mode             |
+| `--headless`  | Run browser in CLI mode            |
 | `--slowmo`    | Slow down execution (milliseconds) |

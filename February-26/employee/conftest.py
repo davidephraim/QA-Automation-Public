@@ -43,8 +43,8 @@ def pytest_addoption(parser):
     parser.addoption(
         "--format",
         action="store",
-        default="Sigmatech",
-        help="Format: Sigmatech, BRI, CIMB"
+        default="sigmatech",
+        help="Format: sigmatech, bri, cimb, mandiri, hypernet"
     )
 
 # ================= LEAVE FIXTURE =================
@@ -107,7 +107,7 @@ def company_format(request):
 
     fmt = request.config.getoption("--format")
 
-    allowed = ["sigmatech", "bri", "cimb"]
+    allowed = ["sigmatech", "bri", "cimb", "mandiri", "hypernet"]
 
     if fmt not in allowed:
         raise ValueError(f"--format must be one of {allowed}")

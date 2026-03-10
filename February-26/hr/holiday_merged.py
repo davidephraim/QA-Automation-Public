@@ -1,6 +1,5 @@
 import re, json
 from pathlib import Path
-from playwright.sync_api import Playwright, sync_playwright, expect
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 CREDENTIAL_PATH = BASE_DIR / "credentials.json"
@@ -12,7 +11,6 @@ with open(CREDENTIAL_PATH) as fc:
 # ================= LOGIN =================
 
 def login_page(page, env):
-
     username = cred[env]["admin"]["username"]
     password = cred[env]["admin"]["password"]
     link = cred[env]["link"]
@@ -56,19 +54,13 @@ def search_set_holiday(page, holiday_config):
 # ================= SUBMISSION =================
 
 def submit_stage(page):
-    # Submission
     page.get_by_role("button", name="Edit").click()
     page.get_by_role("link", name="Close").click()
 
 
 # ================= TEST =================
 
-def test_edit_holiday(playwright: Playwright, holiday_config, env_config):
-    
-    browser = playwright.chromium.launch(headless=True)
-    context = browser.new_context()
-    page = context.new_page()
-
+def test_edit_holiday(page, holiday_config, env_config):
     login_page(page, env_config)
     search_set_holiday(page, holiday_config)
     submit_stage(page)

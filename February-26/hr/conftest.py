@@ -1,7 +1,7 @@
 import json
 import pytest
 from pathlib import Path
-from timesheet_merged import approve_timesheet, reject_timesheet
+from hr.hr_timesheet_merged import approve_timesheet, reject_timesheet
 
 BASE_DIR = Path(__file__).resolve().parent
 HOLIDAY_PATH = BASE_DIR / "holiday_date.json"
@@ -46,6 +46,14 @@ def pytest_addoption(parser):
         action="store",
         default="dev",
         help="Environment: dev or stg"
+    )
+    
+    # ================= FORMAT =================
+    parser.addoption(
+        "--format",
+        action="store",
+        default="sigmatech",
+        help="Format: sigmatech, bri, cimb, mandiri, hypernet"
     )
 
 # ================= LEAVE FIXTURE =================
@@ -117,3 +125,18 @@ def action_config(request):
         raise ValueError("--action must be approve or reject")
 
     return actions[action]
+
+
+# ================= FORMAT FIXTURE =================
+
+@pytest.fixture
+def company_format(request):
+
+    fmt = request.config.getoption("--format")
+
+    allowed = ["sigmatech", "bri", "cimb", "mandiri", "hypernet"]
+
+    if fmt not in allowed:
+        raise ValueError(f"--format must be one of {allowed}")
+
+    return fmt

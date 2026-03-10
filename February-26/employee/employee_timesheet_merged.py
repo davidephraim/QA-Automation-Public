@@ -1,5 +1,7 @@
 import json
 from pathlib import Path
+from hr.set_format import set_employee_format
+from employee.employee_timesheet_download import download_timesheet
 from playwright.sync_api import Playwright
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -55,21 +57,31 @@ def create_timesheet(page, timesheet_type, fmt):
 
     # SUBMIT
     if fmt == "bri" or fmt == "cimb":
-        page.locator("input[name=\"custom_fields[0].value\"]").fill(f"{fmt.upper} timesheet has been Created by Automation -D.")
+        page.locator("input[name=\"custom_fields[0].value\"]").fill(f"{fmt.upper()} timesheet has been Created by Automation -D.")
+    elif fmt == "mandiri":
+        page.locator("input[name=\"custom_fields[0].value\"]").fill(f"{fmt.upper(), 1} timesheet has been Created by Automation -D.")
+        page.locator("input[name=\"custom_fields[1].value\"]").fill(f"{fmt.upper(), 2} timesheet has been Created by Automation -D.")
+    elif fmt == "hypernet":
+        page.locator("input[name=\"custom_fields[0].value\"]").fill(f"{fmt.upper(), 1} timesheet has been Created by Automation -D.")
+        page.locator("input[name=\"custom_fields[1].value\"]").fill(f"{fmt.upper(), 2} timesheet has been Created by Automation -D.")
+        page.locator("input[name=\"custom_fields[2].value\"]").fill(f"{fmt.upper(), 3} timesheet has been Created by Automation -D.")
+        page.locator("input[name=\"custom_fields[3].value\"]").fill(f"{fmt.upper(), 4} timesheet has been Created by Automation -D.")
+
     page.get_by_role("button", name="Create").click()
     page.get_by_role("link", name="Close").click()
 
 
 # ================= TEST =================
 
-def test_create_timesheet(playwright: Playwright, timesheet_config, env_config, company_format):
+def test_create_timesheet(playwright: Playwright, page, timesheet_config, env_config, company_format):
+    # Set employee timesheet format
+    set_employee_format(playwright, env_config, company_format)
 
-    browser = playwright.chromium.launch(headless=True)
-    context = browser.new_context()
-    page = context.new_page()
-
+    # Create timesheet
     login_page(page, env_config)
     create_timesheet(page, timesheet_config, company_format)
 
-    context.close()
-    browser.close()
+    # Download timesheet
+    download_timesheet(playwright, env_config)
+
+    

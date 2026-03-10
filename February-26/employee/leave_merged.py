@@ -55,7 +55,6 @@ def select_single_day(page, selected_date):
 # ================= CREATE LEAVE =================
 
 def create_leave(page, leave_type, selected_date):
-
     page.locator("div").filter(has_text=re.compile(r"^Leave$")).nth(2).click()
     page.get_by_role("link", name="Leave Approval").click()
     page.get_by_role("button", name="Add +").click()
@@ -80,25 +79,16 @@ def create_leave(page, leave_type, selected_date):
 
     page.locator('textarea[name="reason"]').fill(f"{leave_type.upper} has been Created by Automation -D.")
     page.get_by_role("button", name="Create").click()
-    page.wait_for_timeout(2000)
+    page.wait_for_timeout(1000)
     page.get_by_role("link", name="Close").click()
 
 
 # ================= TEST =================
 
-def test_create_leave(playwright: Playwright, leave_config, env_config):
-
-    browser = playwright.chromium.launch(headless=False)
-    context = browser.new_context()
-    page = context.new_page()
-
+def test_create_leave(page, leave_config, env_config):
     login_page(page, env_config)
-
     create_leave(
         page,
         leave_config["leave_type"],
         leave_config["selected_date"]
     )
-
-    context.close()
-    browser.close()
