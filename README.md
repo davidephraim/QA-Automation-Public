@@ -30,7 +30,6 @@ Supported system formats:
 * InfoSys BRI
 * InfoSys CIMB
 * Mandiri Inhealth
-* Hypernet KFC
 
 ---
 
@@ -42,18 +41,19 @@ February-26/
 │   │   └── img_dummy.png
 │   ├── __init__.py
 │   ├── conftest.py
-│   ├── employee_timesheet_merged.json
-│   ├── leave_date.py
+│   ├── employee_timesheet_download.py
+│   ├── employee_timesheet_merged.py
+│   ├── leave_date.json
 │   └── leave_merged.py
 │
 ├── hr/
-│   ├── cancel_leave.py
 │   ├── __init__.py
+│   ├── cancel_leave.py
 │   ├── conftest.py
-│   ├── holiday_date.json
+│   ├── format.json
 │   ├── holiday_merged.py
-│   ├── leave_date.json
 │   ├── hr_timesheet_merged.py
+│   ├── leave_date.json
 │   └── set_format.json
 │
 ├── venv/
@@ -99,7 +99,6 @@ Available Timesheet Format (TIMESHEET_FORMAT)
 | bri       | InfoSys BRI      |
 | cimb      | InfoSys CIMB     |
 | mandiri   | Mandiri Inhealth |
-| hypernet  | Hypernet         |
 
 
 Available Scenarios (TIMESHEET_PERIOD)
