@@ -27,7 +27,7 @@ def login_page(page, env):
 
 # ================= DOWNLOAD LATEST TIMESHEET =================
 
-def download_timesheet(playwright, env_config):
+def download_timesheet(playwright, env_config, company_format, timesheet_config):
     browser = playwright.chromium.launch(headless=False)
     context = browser.new_context()
     page = context.new_page()
@@ -37,19 +37,20 @@ def download_timesheet(playwright, env_config):
 
     # DOWNLOAD TIMESHEET
     page.get_by_role("link", name="Timesheet").click()
-    page.locator("tbody tr").first.locator("td").first.click()
-    page.locator(".icon-crud-family").first.click()
+    page.locator("tbody tr").nth(0).locator("td").nth(0).click()
+    page.locator(".icon-crud-family").nth(0).click()
 
-    with page.expect_download() as download_info:
-        page.get_by_text("Download Client's Format").click()
+    if company_format == "sigmatech":
+        with page.expect_download() as download_info:
+            page.get_by_text("Download Sigmatech's Format").click()
+    else:
+        with page.expect_download() as download_info:
+            page.get_by_text("Download Client's Format").click()
 
     download = download_info.value
 
-    path = "Downloaded_timesheet/" + download.suggested_filename
+    path = f"{BASE_DIR}/employee/Downloaded_timesheet/{company_format.upper()}/" + f"{env_config.upper()} - Employee - {company_format} - {timesheet_config} - {download.suggested_filename}"
     download.save_as(path)
-
-    print("Downloaded file:", download.suggested_filename)
-    print("Saved to:", path)
     
     context.close()
     browser.close()
