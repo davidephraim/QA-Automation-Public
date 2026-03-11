@@ -26,10 +26,24 @@ def login_page(page, env):
     page.locator("a:has(p:has-text('Human Resource'))").click()
 
 
+# ================= SEARCH EMPLOYEE =================
+
+def search_employee(page):
+    page.locator("input.search").fill("alaba")
+    page.wait_for_timeout(500)
+
+    page.locator(".icon-crud-family").click()
+
+    page.get_by_role("link", name="Work Information").click()
+    page.locator(".icon-crud-family").first.click()
+    page.get_by_role("link", name="Detail").click()
+
+    page.wait_for_timeout(2000)
+
+
 # ================= SET FORMAT =================
 
 def set_format(page, fmt):
-
     format_id = None
     format_name = None
 
@@ -42,17 +56,7 @@ def set_format(page, fmt):
     if format_id is None:
         raise ValueError(f"Format '{fmt}' not found in format.json")
 
-    # search employee
-    page.locator("input.search").fill("alaba")
-    page.wait_for_timeout(500)
-
-    page.locator(".icon-crud-family").click()
-
-    page.get_by_role("link", name="Work Information").click()
-    page.locator(".icon-crud-family").first.click()
-    page.get_by_role("link", name="Detail").click()
-
-    page.wait_for_timeout(2000)
+    search_employee(page)
 
     page.evaluate("""
         (id) => {
@@ -74,6 +78,24 @@ def submit_stage(page):
     page.get_by_role("button", name="Update").click()
     page.get_by_role("button", name="Confirm").click()
     page.get_by_role("link", name="OK").click()
+
+
+# ================= DS TOGGLE =================
+
+def toggle_approval_using_space(page, env, enable=True):
+    link = cred[env]["link"]
+    
+    page.goto(link+"/human-resource/employee")
+    search_employee(page)
+
+    switch = page.locator('input[name="approval_using_space"]')
+
+    if enable:
+        if not switch.is_checked():
+            switch.check()
+    else:
+        if switch.is_checked():
+            switch.uncheck()
 
 
 # ================= TEST =================

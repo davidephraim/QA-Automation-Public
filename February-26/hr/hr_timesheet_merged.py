@@ -27,17 +27,13 @@ def login_page(page, env):
 
 def approve_timesheet(page):
     page.get_by_role("link", name="Timesheet").click()
-    page.locator("tr:first-child td:nth-child(4) a").click()
 
+    page.reload(wait_until="load")
+    
+    page.locator("tr:first-child td:nth-child(4) a").click()
     page.get_by_role("button", name="Approval").click()
 
-    # with page.expect_download() as download_info:
-    #     page.frame_locator("iframe").locator("cr-icon-button#save").click()
-
-    # download = download_info.value
-    # download.save_as("Downloaded_timesheet/" + download.suggested_filename)
-
-    checkbox = page.get_by_placeholder("1").nth(1)
+    checkbox = page.get_by_placeholder("1").nth(0)
     checkbox.scroll_into_view_if_needed()
     checkbox.check()
 
@@ -48,21 +44,10 @@ def approve_timesheet(page):
 # ================= REJECT TIMESHEET =================
 
 def reject_timesheet(page):
-    page.get_by_role("link", name="Timesheet").click()
-    page.locator("tr:first-child td:nth-child(4) a").click()
-
+    # page.get_by_role("link", name="Timesheet").click()
+    
+    # page.locator("tr:first-child td:nth-child(4) a").click()
     page.get_by_role("button", name="Approval").click()
-
-    # page.locator("#plugin").wait_for()
-
-    # pdf_url = page.locator("#plugin").get_attribute("original-url")
-
-    # filename = pdf_url.split("/")[-1]
-
-    # response = page.request.get(pdf_url)
-
-    # with open(f"Downloaded_timesheet/{filename}", "wb") as f:
-    #     f.write(response.body())
 
     reject_checkbox = page.get_by_placeholder("1").nth(1)
     reject_checkbox.scroll_into_view_if_needed()
@@ -82,8 +67,48 @@ def submit_stage(page):
     page.get_by_role("link", name="OK").click()
 
 
+# ================= DOWNLOAD TIMESHEET =================
+
+def download_timesheet(page, company_format, timesheet_config, env):
+    page.locator(".icon-crud-family").nth(2).click()
+
+    if company_format == "sigmatech":
+        with page.expect_download() as download_info:
+            page.get_by_text("Download Sigmatech's Format").click()
+    else:
+        with page.expect_download() as download_info:
+            page.get_by_text("Download Client's Format").click()
+
+    download = download_info.value
+
+    path = f"{BASE_DIR}/hr/Downloaded_timesheet/{company_format.upper()}/" + f"{env.upper()} - HR - {company_format} - {timesheet_config} - {download.suggested_filename}"
+    download.save_as(path)
+
+
 # ================= TEST =================
 
-def test_timesheet_action(page, env_config, action_config):
+# def test_timesheet_action(page, env_config, action_config, company_format):
+#     login_page(page, env_config)
+#     action_config(page)
+#     download_timesheet(page, company_format)
+
+
+# ================= CONT. =================
+
+def timesheet_employee(playwright, env_config, company_format, timesheet_config):
+    browser = playwright.chromium.launch(headless=False)
+    context = browser.new_context()
+    page = context.new_page()
+
+    # LOGIN
     login_page(page, env_config)
-    action_config(page)
+    
+    # DS approval waiting
+    page.wait_for_timeout(10000)
+
+    approve_timesheet(page)
+    download_timesheet(page, company_format, timesheet_config, env_config)
+    reject_timesheet(page)
+
+    context.close()
+    browser.close()
