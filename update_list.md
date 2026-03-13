@@ -10,3 +10,7 @@ pytest employee_timesheet_merged.py --env=dev --headed
 
 ## unstable_feature.py
 1. Need re-run to check after dev get update from staging.
+
+# New Feature
+This script can generate all personal information of user. Can be use on dev or staging.
+pytest set_personal_info.py --env= --username=.com --password= --name= --headed
