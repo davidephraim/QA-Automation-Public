@@ -1,0 +1,15 @@
+{
+  "string": {
+    "text": "Filled by Automation -D.",
+    "number": {
+        "short": "1",
+        "long": "1234567890123456"
+    },
+    "email": "a@a.a",
+    "special": "!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~"
+  },
+  "file": {
+    "img": "File_test/file_sample_100kB.jpg",
+    "pdf": "File_test/file_sample_150kB.pdf"
+  }
+}
