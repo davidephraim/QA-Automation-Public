@@ -1,3 +1,4 @@
+import os
 import json
 from pathlib import Path
 from hr.set_format import set_employee_format
@@ -10,6 +11,8 @@ CREDENTIAL_PATH = BASE_DIR / "credentials.json"
 
 with open(CREDENTIAL_PATH) as fc:
     cred = json.load(fc)
+
+file_sampel_pdf = BASE_DIR / "employee" / "File_test" / "file_sample_150kB.pdf"
 
 
 # ================= LOGIN =================
@@ -63,13 +66,13 @@ def create_timesheet(page, timesheet_type, fmt):
     if fmt == "bri" or fmt == "cimb":
         page.locator("input[name=\"custom_fields[0].value\"]").fill(f"{fmt.upper()} {comment}")
     elif fmt == "mandiri":
-        page.locator("input[name=\"custom_fields[0].value\"]").fill(f"{fmt.upper(), 1} {comment}")
-        page.locator("input[name=\"custom_fields[1].value\"]").fill(f"{fmt.upper(), 2} {comment}")
+        page.locator("input[name=\"custom_fields[0].value\"]").fill(f"{fmt.upper()}-1 {comment}")
+        page.locator("input[name=\"custom_fields[1].value\"]").fill(f"{fmt.upper()}-2 {comment}")
     elif fmt == "hypernet":
-        page.locator("input[name=\"custom_fields[0].value\"]").fill(f"{fmt.upper(), 1} {comment}")
-        page.locator("input[name=\"custom_fields[1].value\"]").fill(f"{fmt.upper(), 2} {comment}")
-        page.locator("input[name=\"custom_fields[2].value\"]").fill(f"{fmt.upper(), 3} {comment}")
-        page.locator("input[name=\"custom_fields[3].value\"]").fill(f"{fmt.upper(), 4} {comment}")
+        page.locator("input[name=\"custom_fields[0].value\"]").fill(f"{fmt.upper()}-1 {comment}")
+        page.locator("input[name=\"custom_fields[1].value\"]").fill(f"{fmt.upper()}-2 {comment}")
+        page.locator("input[name=\"custom_fields[2].value\"]").fill(f"{fmt.upper()}-3 {comment}")
+        page.locator("input[name=\"custom_fields[3].value\"]").fill(f"{fmt.upper()}-4 {comment}")
 
     page.get_by_role("button", name="Create").click()
     page.get_by_role("link", name="Close").click()
@@ -109,8 +112,7 @@ def without_ds(page):
 
     page.get_by_text("Send Approval").click()
     page.get_by_role("button", name="Choose File").click()
-    file_path = BASE_DIR / "employee" / "File_test" / "Infosys_BRI.pdf"
-    page.locator("input[type='file']").set_input_files(file_path)
+    page.locator("input[type='file']").set_input_files(file_sampel_pdf)
 
     page.get_by_role("button", name="Send").click()
     page.get_by_role("button", name="Confirm").click()
@@ -126,27 +128,91 @@ def create_employee_timesheet(playwright: Playwright, env_config, company_format
     context = browser.new_context()
     page = context.new_page()
 
-    # login employee
+    page.set_default_timeout(0)
+    page.set_default_navigation_timeout(0)
+    
     login_page(page, env_config)
 
-    # create timesheet
     create_timesheet(page, timesheet_config, company_format)
-    
-    # jika siklus ke 2
+
     if use_without_ds:
         without_ds(page)
-        download_timesheet(playwright, env_config, not "sigmatech", timesheet_config)
 
-    # download employee
+        download_timesheet(playwright, env_config, "", timesheet_config)
+
     else:
         download_timesheet(playwright, env_config, company_format, timesheet_config)
 
-    # HR action
     timesheet_employee(playwright, env_config, company_format, timesheet_config)
+    process_checksum(company_format)
 
     context.close()
     browser.close()
 
+
+# ================= CHECKSUM =================
+
+def sha256_checksum(file_path, chunk_size=8192):
+    import hashlib
+
+    sha256 = hashlib.sha256()
+
+    with open(file_path, "rb") as f:
+        while chunk := f.read(chunk_size):
+            sha256.update(chunk)
+
+    return sha256.hexdigest()
+
+
+# ================= REPORT CHECKSUM =================
+
+def write_checksum_report(file_path, checksum, status):
+
+    report_path = BASE_DIR / "checksum_report.txt"
+
+    with open(report_path, "a", encoding="utf-8") as f:
+        f.write(f"{file_path.name} | {checksum} | {status}\n")
+
+
+# ================= GET FILE =================
+
+def get_latest_file(folder_path):
+
+    files = list(folder_path.glob("*"))
+
+    if not files:
+        return None
+
+    latest_file = max(files, key=os.path.getctime)
+
+    return latest_file
+
+
+# ================= CHECKSUM PROCESS =================
+
+def process_checksum(company_format):
+
+    download_folder = BASE_DIR / "hr" / "Downloaded_timesheet" / company_format.upper()
+
+    latest_file = get_latest_file(download_folder)
+
+    if not latest_file:
+        return
+
+    downloaded_checksum = sha256_checksum(latest_file)
+
+    # checksum dari static file
+    static_checksum = sha256_checksum(file_sampel_pdf)
+
+    if downloaded_checksum == static_checksum:
+        status = "MATCH"
+    else:
+        status = "DIFFERENT"
+
+    write_checksum_report(latest_file, downloaded_checksum, status)
+
+    print(f"{latest_file.name} | {downloaded_checksum} | {status}")
+    
 
 TIMESHEET_TYPES = ["full", "halfh", "halft", "last"]
 
@@ -154,9 +220,12 @@ FORMATS = [
     "sigmatech",
     "bri",
     "cimb",
-    "mandiri"
+    "mandiri",
+    "hypernet"
 ]
 
+
+# ================= EXECUTION =================
 
 def test_timesheet_merged(playwright, env_config):
 
@@ -178,24 +247,25 @@ def test_timesheet_merged(playwright, env_config):
                 use_without_ds=False
             )
 
-    # admin wait
-    open_admin_wait(playwright, env_config)
+    # # admin wait
+    # open_admin_wait(playwright, env_config)
 
 
     # ======================
     # CYCLE 2 (WITHOUT DS)
     # ======================
 
-    for company_format in FORMATS:
+    # for company_format in FORMATS:
 
-        set_employee_format(playwright, env_config, company_format)
+    #     set_employee_format(playwright, env_config, company_format)
 
-        for timesheet_type in TIMESHEET_TYPES:
+    #     for timesheet_type in TIMESHEET_TYPES:
 
-            create_employee_timesheet(
-                playwright,
-                env_config,
-                company_format,
-                timesheet_type,
-                use_without_ds=True
-            )
+    #         create_employee_timesheet(
+    #             playwright,
+    #             env_config,
+    #             company_format,
+    #             timesheet_type,
+    #             use_without_ds=True
+    #         )
+
