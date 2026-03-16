@@ -25,8 +25,12 @@ def login_hr(page, env):
 
     page.locator('input[name="email"]').fill(username)
     page.locator('input[name="password"]').fill(password)
-
     page.get_by_role("button", name="Submit").click()
+    
+    ok_button = page.get_by_role("link", name="OK")
+    ok_button.wait_for(state="visible")
+    ok_button.click()
+
     page.locator("a:has(p:has-text('Human Resource'))").click()
 
 
@@ -40,9 +44,11 @@ def login_employee(page, env, username, password, name):
     page.locator('input[name="password"]').fill(password)
     page.get_by_role("button", name="Submit").click()
     
-    page.get_by_role("link", name="OK").click()
+    ok_button = page.get_by_role("link", name="OK")
+    ok_button.wait_for(state="visible")
+    ok_button.click()
     
-    page.locator(f'label.wrap-role-main:has-text("{name}")').click()
+    page.locator(".wrap-role").click()
     page.get_by_text("Edit Profile").click()
 
 
@@ -283,8 +289,9 @@ def employee_merge(page, env, username, password, name):
     set_ptkp_status(page)
 
 
-# ================= MERGE =================
+# ================= TEST =================
+
 def test_set_profile(playwright: Playwright, page, env, username, password, name):
-    # set_npwp(playwright, env, name)
+    set_npwp(playwright, env, name)
 
     employee_merge(page, env, username, password, name)
