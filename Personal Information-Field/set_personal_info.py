@@ -1,7 +1,11 @@
-import re
+# ================= LIBRARY =================
+
 import json
 from pathlib import Path
-from playwright.sync_api import Playwright
+from playwright.sync_api import Playwright, TimeoutError
+
+
+# ================= STATIC DIRECTORIES =================
 
 BASE_DIR = Path(__file__).resolve().parent
 CREDENTIAL_PATH = BASE_DIR / "credentials.json"
@@ -20,16 +24,14 @@ def login_hr(page, env):
     username = cred[env]["hr"]["username"]
     password = cred[env]["hr"]["password"]
     link = cred[env]["link"]
-
     page.goto(link)
 
     page.locator('input[name="email"]').fill(username)
     page.locator('input[name="password"]').fill(password)
     page.get_by_role("button", name="Submit").click()
-    
-    ok_button = page.get_by_role("link", name="OK")
-    ok_button.wait_for(state="visible")
-    ok_button.click()
+
+    if page.get_by_text("OK").is_visible(timeout=3000):
+        page.get_by_text("OK").click()
 
     page.locator("a:has(p:has-text('Human Resource'))").click()
 
@@ -44,9 +46,8 @@ def login_employee(page, env, username, password, name):
     page.locator('input[name="password"]').fill(password)
     page.get_by_role("button", name="Submit").click()
     
-    ok_button = page.get_by_role("link", name="OK")
-    ok_button.wait_for(state="visible")
-    ok_button.click()
+    if page.get_by_text("OK").is_visible(timeout=3000):
+        page.get_by_text("OK").click()
     
     page.locator(".wrap-role").click()
     page.get_by_text("Edit Profile").click()
@@ -225,6 +226,7 @@ def set_working_experience(page):
     page.get_by_role("button", name="Add +").click()
     confirm(page)
 
+
 # ================= ADDITIONAL QUESTIONNAIR =================
 
 def set_additional_questionnair(page):
@@ -270,7 +272,17 @@ def set_ptkp_status(page):
     page.locator("input[name=\"date_of_birth\"]").fill("2026-03-13")
     
     page.get_by_role("button", name="Create").click()
-    confirm(page)
+    page.get_by_role("button", name="Confirm").click()
+    
+    try:
+        page.get_by_role("link", name="OK").click(timeout=3000)
+    except TimeoutError:
+        pass
+
+    try:
+        page.get_by_text("Confirm").click(timeout=3000)
+    except TimeoutError:
+        pass
 
 
 # ================= MERGE =================
