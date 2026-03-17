@@ -6,15 +6,19 @@ from pathlib import Path
 
 # ================= STATIC DIRECTORIES =================
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent
 CREDENTIAL_PATH = BASE_DIR / "credentials.json"
-FORMAT_PATH = BASE_DIR / "hr" / "format.json"
+DATE_PATH = BASE_DIR / "stat_employee.json"
+FORMAT_PATH = BASE_DIR / "format.json"
 
-with open(CREDENTIAL_PATH) as fc:
-    cred = json.load(fc)
+with open(CREDENTIAL_PATH) as f:
+    cred = json.load(f)
 
-with open (FORMAT_PATH) as fp:
-    format_path = json.load(fp)
+with open (DATE_PATH) as f:
+    stat_employee_path = json.load(f)
+
+with open (FORMAT_PATH) as f:
+    format_path = json.load(f)
 
 
 # ================= LOGIN =================
@@ -71,8 +75,6 @@ def set_timesheet_format(page, fmt):
     if format_id is None:
         raise ValueError(f"Format '{fmt}' not found in format.json")
 
-    search_employee(page)
-
     page.evaluate("""
         (id) => {
         const select = document.querySelector('select[name="timesheet_client_format_id"]');
@@ -89,11 +91,7 @@ def set_timesheet_format(page, fmt):
 
 # ================= DS TOGGLE =================
 
-def toggle_approval_using_space(page, env, enable=True):
-    link = cred[env]["link"]
-    
-    page.goto(link+"/human-resource/employee")
-    search_employee(page)
+def toggle_approval_using_space(page, enable=True):
 
     switch = page.locator('input[name="approval_using_space"]')
 
@@ -105,6 +103,41 @@ def toggle_approval_using_space(page, env, enable=True):
             switch.uncheck()
     
     return "Toggle approval has been successfully set."
+
+
+# ================= JS TEMPLATE =================
+
+def js_template(page, selector, value):
+
+    page.evaluate("""
+        (id) => {
+        const select = document.querySelector(selector);
+        select.value = id;
+        select.dispatchEvent(new Event('input', { bubbles: true }));
+        select.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+        """, {"selector": selector, "value": value})
+
+    page.wait_for_timeout(500)
+
+
+# ================= STAGE 1 FIELD =================
+
+def stage_field_1(page, fmt, name, ds, dept):
+    set_timesheet_format(page, fmt)
+    toggle_approval_using_space(page, ds)
+    page.locator('input[name="end_effective_date"]').fill(stat_employee_path["effective"]["end"])
+    page.locator('input[name="start_effective_date"]').fill(stat_employee_path["effective"]["start"])
+    page.locator('input[name="name"]').fill(name)
+
+    # set gender (male):
+    js_template(page, 'select[name="gender"]', "Male")
+
+    # set department:
+    js_template(page, 'select[name="department"]', stat_employee_path[dept])
+    print(page.locator("input[name='job_title']").input_value())
+    
+    page.locator('input[name="name"]').fill(name)
 
 
 # ================= SUBMISSION =================
@@ -119,13 +152,17 @@ def submit_stage(page):
 
 # ================= MERGE =================
 
-def set_work_history_merge(page, name):
-    a=a
+def set_work_history_merge(page, name, fmt, ds):
+    search_employee(page, name)
+    set_timesheet_format(page, fmt)
+    toggle_approval_using_space(page, ds)
+
+
 # ================= TEST =================
 
-def set_employee_format(page, env_config, company_format, name):
+def set_employee_format(page, env_config, company_format, name, ds_config):
     login_hr(page, env_config)
 
-    set_work_history_merge(page, name, company_format)
+    set_work_history_merge(page, name, company_format, ds_config)
     
     submit_stage(page)
