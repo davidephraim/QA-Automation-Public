@@ -11,5 +11,6 @@
   "file": {
     "img": "File_test/file_example_JPG_100kB.jpg",
     "pdf": "File_test/file_example_PDF_150kB.pdf"
-  }
+  },
+  "date": "0001-01-01"
 }

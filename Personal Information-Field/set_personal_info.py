@@ -3,6 +3,7 @@
 import json
 from pathlib import Path
 from playwright.sync_api import Playwright, TimeoutError
+import logging
 
 
 # ================= STATIC DIRECTORIES =================
@@ -18,6 +19,17 @@ with open (STATIC_PATH) as fp:
     stat = json.load(fp)
 
 
+# ================= LOGS =================
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s"
+)
+
+def log_step(step_name):
+    logging.info(f"{step_name} completed successfully.")
+    
+    
 # ================= LOGIN HR =================
 
 def login_hr(page, env):
@@ -30,8 +42,12 @@ def login_hr(page, env):
     page.locator('input[name="password"]').fill(password)
     page.get_by_role("button", name="Submit").click()
 
-    if page.get_by_text("OK").is_visible(timeout=3000):
-        page.get_by_text("OK").click()
+    ok_button = page.get_by_text("OK")
+    try:
+        ok_button.wait_for(state="visible", timeout=5000)
+        ok_button.click()
+    except TimeoutError:
+        pass
 
     page.locator("a:has(p:has-text('Human Resource'))").click()
 
@@ -46,8 +62,12 @@ def login_employee(page, env, username, password, name):
     page.locator('input[name="password"]').fill(password)
     page.get_by_role("button", name="Submit").click()
     
-    if page.get_by_text("OK").is_visible(timeout=3000):
-        page.get_by_text("OK").click()
+    ok_button = page.get_by_text("OK")
+    try:
+        ok_button.wait_for(state="visible", timeout=5000)
+        ok_button.click()
+    except TimeoutError:
+        pass
     
     page.locator(".wrap-role").click()
     page.get_by_text("Edit Profile").click()
@@ -81,6 +101,8 @@ def set_npwp (playwright: Playwright, env, name):
 
     context.close()
     browser.close()
+    
+    log_step("NPWP setup")
 
 
 # ================= GENERAL PERSONAL =================
@@ -96,11 +118,14 @@ def set_general_personal(page, name):
     page.locator("input[name=\"cityKTP\"]").fill(stat["string"]["text"])
     page.locator("input[name=\"postalCodeKTP\"]").fill(stat["string"]["number"]["short"])
     page.locator("input[name=\"birth_place\"]").fill(stat["string"]["text"])
+    page.locator("input[name=\"birthday\"]").fill(stat["date"])
     
     page.locator("select[name=\"religion\"]").select_option("Protestan")
     page.locator("select[name=\"blood_type\"]").select_option("B")
     
     page.locator("input[name=\"nationality\"]").fill(stat["string"]["text"])
+
+    page.locator("input[name='residence_address_status']").first.click()
 
     page.locator("input[name=\"ktp\"]").fill(stat["string"]["number"]["long"])
     page.locator("input[name=\"kk\"]").fill(stat["string"]["number"]["long"])
@@ -108,10 +133,13 @@ def set_general_personal(page, name):
     
     page.locator("input[name=\"email\"]").fill(stat["string"]["email"])
     
-    page.locator("input[type='file']").nth(0).set_input_files(stat["file"]["img"])
+    page.get_by_role("button", name="Choose File").set_input_files(stat["file"]["img"])
+    # page.locator("input[type='file']").first.set_input_files(stat["file"]["img"])
 
     page.get_by_role("button", name="Save").click()
     confirm(page)
+    
+    log_step("General Personal Information setup")
 
 
 # ================= GENERAL FAMILY =================
@@ -141,6 +169,8 @@ def set_general_family(page):
 
     page.get_by_role("button", name="Create").click()
     confirm(page)
+    
+    log_step("Family Information setup")
 
 
 # ================= EDUCATION FORMAL & INFORMAL =================
@@ -161,6 +191,8 @@ def set_education_formal_informal(page):
 
     page.get_by_role("button", name="Create").click()
     confirm(page)
+    
+    log_step("Education formal and informal setup")
 
 
 # ================= EDUCATION COURSE TRAINING =================
@@ -176,6 +208,8 @@ def set_education_course_training(page):
     
     page.get_by_role("button", name="Create").click()
     confirm(page)
+    
+    log_step("Education course training setup")
 
 
 # ================= FOREIGN LANGUAGE =================
@@ -189,6 +223,8 @@ def set_foreign_language(page):
     
     page.get_by_role("button", name="Add +").click()
     confirm(page)
+    
+    log_step("Foreign language setup")
 
 
 # ================= ACTIVITY =================
@@ -202,6 +238,8 @@ def set_activity(page):
     
     page.get_by_role("button", name="Save Changes").click()
     confirm(page)
+    
+    log_step("Activity setup")
 
 
 # ================= WORKING EXPERIENCE =================
@@ -225,6 +263,8 @@ def set_working_experience(page):
     
     page.get_by_role("button", name="Add +").click()
     confirm(page)
+    
+    log_step("Working Experience setup")
 
 
 # ================= ADDITIONAL QUESTIONNAIR =================
@@ -239,6 +279,8 @@ def set_additional_questionnair(page):
     page.get_by_role("button", name="Save Changes").click()
     page.get_by_role("button", name="Confirm").click()
     page.get_by_role("link", name="Close").click()
+    
+    log_step("Questionnair setup")
 
 
 # ================= ADDITIONAL ATTACHMENT =================
@@ -258,6 +300,8 @@ def set_attachment(page):
     page.get_by_role("button", name="Save").click()
     page.get_by_role("button", name="Confirm").click()
     page.get_by_role("link", name="Close").click()
+    
+    log_step("Attachment setup")
 
 
 # ================= ADDITIONAL PTKP STATUS =================
@@ -283,13 +327,16 @@ def set_ptkp_status(page):
         page.get_by_text("Confirm").click(timeout=3000)
     except TimeoutError:
         pass
+    
+    log_step("PTKP status setup")
 
 
 # ================= MERGE =================
 
-def employee_merge(page, env, username, password, name):
+def employee_merge(playwright, page, env, username, password, name):
     login_employee(page, env, username, password, name)
     set_general_personal(page, name)
+    set_npwp(playwright, env, name)
     set_general_family(page)
     set_education_formal_informal(page)
     set_education_course_training(page)
@@ -304,6 +351,5 @@ def employee_merge(page, env, username, password, name):
 # ================= TEST =================
 
 def test_set_profile(playwright: Playwright, page, env, username, password, name):
-    set_npwp(playwright, env, name)
 
-    employee_merge(page, env, username, password, name)
+    employee_merge(playwright, page, env, username, password, name)
