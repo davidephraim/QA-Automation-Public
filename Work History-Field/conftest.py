@@ -55,15 +55,15 @@ def name(request):
 
 
 @pytest.fixture(scope="session")
-def username(request):
+def fmt(request):
     return request.config.getoption("--format")
 
 
 @pytest.fixture(scope="session")
-def password(request):
+def ds(request):
     return request.config.getoption("--ds")
 
 
 @pytest.fixture(scope="session")
-def password(request):
+def dept(request):
     return request.config.getoption("--dept")
