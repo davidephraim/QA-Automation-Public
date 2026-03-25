@@ -8,26 +8,15 @@ import logging
 
 # ================= STATIC DIRECTORIES =================
 
-BASE_DIR = Path(__file__).resolve().parent
-PROJECT_ROOT = BASE_DIR.parent
-
-CREDENTIAL_PATH = PROJECT_ROOT / "credentials.json"
-STATIC_PATH = PROJECT_ROOT / "static_data.json"
+BASE_DIR = Path(__file__).resolve().parent.parent
+CREDENTIAL_PATH = BASE_DIR / "credentials.json"
+STATIC_PATH = BASE_DIR / "static_data.json"
 
 with open(CREDENTIAL_PATH) as fc:
     cred = json.load(fc)
 
-with open(STATIC_PATH) as fp:
+with open (STATIC_PATH) as fp:
     stat = json.load(fp)
-
-# convert relative file path -> absolute
-stat["file"]["img"] = str(
-    PROJECT_ROOT / stat["file"]["img"]
-)
-
-stat["file"]["pdf"] = str(
-    PROJECT_ROOT / stat["file"]["pdf"]
-)
 
 
 # ================= LOGS =================
@@ -37,31 +26,26 @@ logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s"
 )
 
-
-def log_step(page, step_name):
-    screenshot_dir = BASE_DIR / "screenshots"
-    screenshot_dir.mkdir(exist_ok=True)
-
-    page.screenshot(path=screenshot_dir / f"{step_name}.png")
-
+def log_step(step_name):
     logging.info(f"{step_name} completed successfully.")
-
-
+    
+    
 # ================= LOGIN HR =================
 
 def login_hr(page, env):
     username = cred[env]["hr"]["username"]
     password = cred[env]["hr"]["password"]
     link = cred[env]["link"]
-
     page.goto(link)
 
     page.locator('input[name="email"]').fill(username)
     page.locator('input[name="password"]').fill(password)
     page.get_by_role("button", name="Submit").click()
 
+    ok_button = page.get_by_text("OK")
     try:
-        page.get_by_text("OK").click(timeout=5000)
+        ok_button.wait_for(state="visible", timeout=5000)
+        ok_button.click()
     except TimeoutError:
         pass
 
@@ -70,26 +54,26 @@ def login_hr(page, env):
 
 # ================= LOGIN EMPLOYEE =================
 
-def login_employee(page, env, username, password):
+def login_employee(page, env, username, password, name):
     link = cred[env]["link"]
-
     page.goto(link)
 
     page.locator('input[name="email"]').fill(username)
     page.locator('input[name="password"]').fill(password)
-
     page.get_by_role("button", name="Submit").click()
-
+    
+    ok_button = page.get_by_text("OK")
     try:
-        page.get_by_text("OK").click(timeout=5000)
+        ok_button.wait_for(state="visible", timeout=5000)
+        ok_button.click()
     except TimeoutError:
         pass
-
+    
     page.locator(".wrap-role").click()
     page.get_by_text("Edit Profile").click()
 
 
-# ================= COMMON =================
+# ================= CONFIRM =================
 
 def confirm(page):
     page.get_by_role("button", name="Confirm").click()
@@ -98,29 +82,27 @@ def confirm(page):
 
 # ================= SET NPWP =================
 
-def set_npwp(browser, env, name):
+def set_npwp (playwright: Playwright, env, name):
+    browser = playwright.chromium.launch(headless=False)
+    context = browser.new_context()
+    page = context.new_page()
 
-    hr_context = browser.new_context()
-    hr_page = hr_context.new_page()
+    login_hr(page, env)
+    
+    page.locator("input.search").fill(name)
+    page.locator(".icon-crud-family").nth(0).click()
+    page.get_by_role("link", name="Supporting Information").click()
+    page.get_by_text("NPWP").click()
+    page.get_by_role("button", name="Add").click()
+    page.get_by_role("textbox").fill(stat["string"]["number"]["long"])
+    page.get_by_role("button", name="Add +").click()
 
-    login_hr(hr_page, env)
+    confirm(page)
 
-    hr_page.locator("input.search").fill(name)
-    hr_page.locator(".icon-crud-family").nth(0).click()
-
-    hr_page.get_by_role("link", name="Supporting Information").click()
-    hr_page.get_by_text("NPWP").click()
-
-    hr_page.get_by_role("button", name="Add").click()
-    hr_page.get_by_role("textbox").fill(stat["string"]["number"]["long"])
-
-    hr_page.get_by_role("button", name="Add +").click()
-
-    confirm(hr_page)
-
-    log_step(hr_page, "npwp")
-
-    hr_context.close()
+    context.close()
+    browser.close()
+    
+    log_step("NPWP setup")
 
 
 # ================= GENERAL PERSONAL =================
@@ -152,11 +134,12 @@ def set_general_personal(page, name):
     page.locator("input[name=\"email\"]").fill(stat["string"]["email"])
     
     page.get_by_role("button", name="Choose File").set_input_files(stat["file"]["img"])
+    # page.locator("input[type='file']").first.set_input_files(stat["file"]["img"])
 
     page.get_by_role("button", name="Save").click()
     confirm(page)
     
-    log_step(page, "general_personal")
+    log_step("General Personal Information setup")
 
 
 # ================= GENERAL FAMILY =================
@@ -186,8 +169,8 @@ def set_general_family(page):
 
     page.get_by_role("button", name="Create").click()
     confirm(page)
-
-    log_step(page, "family")
+    
+    log_step("Family Information setup")
 
 
 # ================= EDUCATION FORMAL & INFORMAL =================
@@ -209,7 +192,7 @@ def set_education_formal_informal(page):
     page.get_by_role("button", name="Create").click()
     confirm(page)
     
-    log_step(page, "formal education")
+    log_step("Education formal and informal setup")
 
 
 # ================= EDUCATION COURSE TRAINING =================
@@ -226,7 +209,7 @@ def set_education_course_training(page):
     page.get_by_role("button", name="Create").click()
     confirm(page)
     
-    log_step(page, "informal education")
+    log_step("Education course training setup")
 
 
 # ================= FOREIGN LANGUAGE =================
@@ -241,7 +224,7 @@ def set_foreign_language(page):
     page.get_by_role("button", name="Add +").click()
     confirm(page)
     
-    log_step(page, "foreign lang")
+    log_step("Foreign language setup")
 
 
 # ================= ACTIVITY =================
@@ -256,7 +239,7 @@ def set_activity(page):
     page.get_by_role("button", name="Save Changes").click()
     confirm(page)
     
-    log_step(page, "activity")
+    log_step("Activity setup")
 
 
 # ================= WORKING EXPERIENCE =================
@@ -281,7 +264,7 @@ def set_working_experience(page):
     page.get_by_role("button", name="Add +").click()
     confirm(page)
     
-    log_step(page, "working")
+    log_step("Working Experience setup")
 
 
 # ================= ADDITIONAL QUESTIONNAIR =================
@@ -297,7 +280,7 @@ def set_additional_questionnair(page):
     page.get_by_role("button", name="Confirm").click()
     page.get_by_role("link", name="Close").click()
     
-    log_step(page, "questionnair")
+    log_step("Questionnair setup")
 
 
 # ================= ADDITIONAL ATTACHMENT =================
@@ -318,7 +301,7 @@ def set_attachment(page):
     page.get_by_role("button", name="Confirm").click()
     page.get_by_role("link", name="Close").click()
     
-    log_step(page, "attachment")
+    log_step("Attachment setup")
 
 
 # ================= ADDITIONAL PTKP STATUS =================
@@ -345,57 +328,28 @@ def set_ptkp_status(page):
     except TimeoutError:
         pass
     
-    log_step(page, "ptkp")
-    
-    
+    log_step("PTKP status setup")
+
+
 # ================= MERGE =================
 
-def employee_merge(browser, env, username, password, name):
-
-    employee_context = browser.new_context()
-    employee_page = employee_context.new_page()
-
-    login_employee(employee_page, env, username, password)
-
-    set_general_personal(employee_page, name)
-
-    # HR update NPWP
-    set_npwp(browser, env, name)
-
-    set_general_family(employee_page)
-
-    # tambahkan
-    set_education_formal_informal(employee_page)
-    set_education_course_training(employee_page)
-    set_foreign_language(employee_page)
-    set_activity(employee_page)
-    set_working_experience(employee_page)
-    set_additional_questionnair(employee_page)
-    set_attachment(employee_page)
-    set_ptkp_status(employee_page)
-
-    employee_context.close()
+def employee_merge(playwright, page, env, username, password, name):
+    login_employee(page, env, username, password, name)
+    set_general_personal(page, name)
+    set_npwp(playwright, env, name)
+    set_general_family(page)
+    set_education_formal_informal(page)
+    set_education_course_training(page)
+    set_foreign_language(page)
+    set_activity(page)
+    set_working_experience(page)
+    set_additional_questionnair(page)
+    set_attachment(page)
+    set_ptkp_status(page)
 
 
 # ================= TEST =================
 
-def test_set_profile(playwright: Playwright, env, username, password, name):
+def test_set_profile(playwright: Playwright, page, env, username, password, name):
 
-    browser = playwright.chromium.launch(
-        headless=True,
-
-        args=[
-            "--disable-dev-shm-usage",
-            "--no-sandbox"
-        ]
-    )
-
-    employee_merge(
-        browser,
-        env,
-        username,
-        password,
-        name
-    )
-
-    browser.close()
+    employee_merge(playwright, page, env, username, password, name)

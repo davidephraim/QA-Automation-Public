@@ -19,16 +19,34 @@ It supports multiple environments and dynamic user credentials via CLI parameter
 ## ✨ Key Features
 
 - 🔄 Full E2E automation flow (Employee + HR interaction)
-- 🌐 Supports multi-environment execution (`dev`, `stg`, etc.)
+- 🌐 Supports multi-environment execution (`dev`, `stg`)
 - 🔐 Dynamic login via CLI parameters
-- 📊 Real-time step-by-step logging
-- 📁 Handles file uploads (image & PDF)
-- 🧱 Modular function design (easy to maintain & extend)
+- 📊 Step-by-step logging output
+- 📁 Supports upload file automation (image & PDF)
+- 🧱 Modular function structure (easy to extend)
+- 🐳 Fully containerized using Docker
+- 💻 Cross-platform (Windows, Linux, CI/CD)
 
 ---
 
 ## 📂 File Structure
-`set_personal_info.py`
+<b>`set_personal_info.py`</b>
+
+```
+Personal Information-Field/
+│
+├── __pycache__
+├── .pytest_cache
+├── screenshots/
+├── conftest.py
+├── README.md
+├── set_personal_info (old_ver).py
+├── set_personal_info.py
+│
+└── File_test/
+    ├── sample.jpg
+    └── sample.pdf
+```
 
 <br>
 
@@ -47,45 +65,52 @@ It supports multiple environments and dynamic user credentials via CLI parameter
 | `--username`     | User login email                  |
 | `--password`     | User password                     |
 | `--name`         | User full name                    |
-| `--headed`       | Run browser in UI mode            |
 
 ---
 
-## 🚀 Execution
+## 🐳 Docker Setup & Execution
 
+### 1. Build docker image
 ```bash
-pytest -s --log-cli-level=INFO \
-  set_personal_info.py \
-  --env=<ENVIRONMENT> \
-  --username=<USER_EMAIL> \
-  --password=<USER_PASSWD> \
-  --name=<USER_NAME> \
-  --headed
+docker build -t playwright-personal-info .
+```
+
+### 2. Check docker image
+```bash
+docker images ls
+```
+
+### 3. Code execution
+```bash
+docker run --rm <IMG_ID> \ 
+pytest -s --log-cli-level=INFO "Personal Information-Field/set_test.py" \ 
+--env=<ENVIRONMENT> \
+--username=<USER_EMAIL> \
+--password=<USER_PASSWD> \
+--name=<USER_NAME>
 ```
 
 <br>
 
 ## 📊 Sample Output
 ```bash
-set_personal_info.py::test_set_profile[chromium]
+Personal Information-Field/set_test.py::test_set_profile
 
----------------------------------------------------- live log call ----------------------------------------------------
-
-INFO     root:set_personal_info.py:30 General Personal Information setup completed successfully.
-INFO     root:set_personal_info.py:30 NPWP setup completed successfully.
-INFO     root:set_personal_info.py:30 Family Information setup completed successfully.
-INFO     root:set_personal_info.py:30 Education formal and informal setup completed successfully.
-INFO     root:set_personal_info.py:30 Education course training setup completed successfully.
-INFO     root:set_personal_info.py:30 Foreign language setup completed successfully.
-INFO     root:set_personal_info.py:30 Activity setup completed successfully.
-INFO     root:set_personal_info.py:30 Working Experience setup completed successfully.
-INFO     root:set_personal_info.py:30 Questionnair setup completed successfully.
-INFO     root:set_personal_info.py:30 Attachment setup completed successfully.
-INFO     root:set_personal_info.py:30 PTKP status setup completed successfully.
-
+-------------------------------- live log call ---------------------------------
+INFO     root:set_test.py:47 general_personal completed successfully.
+INFO     root:set_test.py:47 npwp completed successfully.
+INFO     root:set_test.py:47 family completed successfully.
+INFO     root:set_test.py:47 formal education completed successfully.
+INFO     root:set_test.py:47 informal education completed successfully.
+INFO     root:set_test.py:47 foreign lang completed successfully.
+INFO     root:set_test.py:47 activity completed successfully.
+INFO     root:set_test.py:47 working completed successfully.
+INFO     root:set_test.py:47 questionnair completed successfully.
+INFO     root:set_test.py:47 attachment completed successfully.
+INFO     root:set_test.py:47 ptkp completed successfully.
 PASSED
 
-================================================= 1 passed in 39.79s ==================================================
+============================== 1 passed in 47.12s ==============================
 ```
 
 ---
@@ -95,3 +120,5 @@ PASSED
 - Static test data is loaded from static_data.json.
 - Execution time may vary depending on environment performance.
 - NPWP setup runs in a separate browser session (HR role).
+
+docker image ls
