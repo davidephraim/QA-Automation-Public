@@ -1,9 +1,15 @@
 import json
 from pathlib import Path
 
-BASE_DIR = Path(__file__).resolve().parent.parent
-CREDENTIAL_PATH = BASE_DIR / "credentials.json"
-FORMAT_PATH = BASE_DIR / "hr" / "format.json"
+BASE_DIR = Path(__file__).resolve().parent
+PROJECT_ROOT = BASE_DIR.parent.parent
+
+CREDENTIAL_PATH = PROJECT_ROOT / "credentials.json"
+
+with open(CREDENTIAL_PATH) as fc:
+    cred = json.load(fc)
+
+FORMAT_PATH = BASE_DIR  / "format.json"
 
 with open(CREDENTIAL_PATH) as fc:
     cred = json.load(fc)
@@ -14,8 +20,8 @@ with open (FORMAT_PATH) as fp:
 # ================= LOGIN =================
 
 def login_page(page, env):
-    username = cred[env]["admin"]["username"]
-    password = cred[env]["admin"]["password"]
+    username = cred[env]["hr"]["username"]
+    password = cred[env]["hr"]["password"]
     link = cred[env]["link"]
 
     page.goto(link)
@@ -92,10 +98,10 @@ def toggle_approval_using_space(page, env, enable=True):
 
     if enable:
         if not switch.is_checked():
-            switch.check()
+            switch.click()
     else:
         if switch.is_checked():
-            switch.uncheck()
+            switch.click()
 
 
 # ================= TEST =================
