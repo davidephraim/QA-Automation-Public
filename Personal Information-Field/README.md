@@ -10,9 +10,9 @@ It supports multiple environments and dynamic user credentials via CLI parameter
 
 <br>
 
-## ✅ Status
+## 🚧 Status
 
-**Stable** – Fully tested and ready for daily automation usage 🚀
+**In Progress**—The automation is working for regular use, but some parts are still being improved. There’s a known non-critical issue that will be fixed in a future update.
 
 <br>
 
@@ -36,16 +36,11 @@ It supports multiple environments and dynamic user credentials via CLI parameter
 Personal Information-Field/
 │
 ├── __pycache__
-├── .pytest_cache
 ├── screenshots/
 ├── conftest.py
 ├── README.md
 ├── set_personal_info (old_ver).py
-├── set_personal_info.py
-│
-└── File_test/
-    ├── sample.jpg
-    └── sample.pdf
+└── set_personal_info.py
 ```
 
 <br>
@@ -72,18 +67,18 @@ Personal Information-Field/
 
 ### 1. Build docker image
 ```bash
-docker build -t playwright-personal-info .
+docker build -t playwright-space:set_personal_info .
 ```
 
 ### 2. Check docker image
 ```bash
-docker images ls
+docker image ls
 ```
 
 ### 3. Code execution
 ```bash
 docker run --rm <IMG_ID> \ 
-pytest -s --log-cli-level=INFO "Personal Information-Field/set_test.py" \ 
+pytest -s --log-cli-level=INFO "Personal Information-Field/set_personal_info.py" \ 
 --env=<ENVIRONMENT> \
 --username=<USER_EMAIL> \
 --password=<USER_PASSWD> \
@@ -94,23 +89,23 @@ pytest -s --log-cli-level=INFO "Personal Information-Field/set_test.py" \
 
 ## 📊 Sample Output
 ```bash
-Personal Information-Field/set_test.py::test_set_profile
+Personal Information-Field/set_personal_info.py::test_set_profile 
 
 -------------------------------- live log call ---------------------------------
-INFO     root:set_test.py:47 general_personal completed successfully.
-INFO     root:set_test.py:47 npwp completed successfully.
-INFO     root:set_test.py:47 family completed successfully.
-INFO     root:set_test.py:47 formal education completed successfully.
-INFO     root:set_test.py:47 informal education completed successfully.
-INFO     root:set_test.py:47 foreign lang completed successfully.
-INFO     root:set_test.py:47 activity completed successfully.
-INFO     root:set_test.py:47 working completed successfully.
-INFO     root:set_test.py:47 questionnair completed successfully.
-INFO     root:set_test.py:47 attachment completed successfully.
-INFO     root:set_test.py:47 ptkp completed successfully.
+INFO     root:set_personal_info.py:47 Set NPWP by HR completed successfully.
+INFO     root:set_personal_info.py:47 General—Personal completed successfully.
+INFO     root:set_personal_info.py:47 General—Family completed successfully.
+INFO     root:set_personal_info.py:47 Education—Formal & Informal completed successfully.
+INFO     root:set_personal_info.py:47 Education—Course completed successfully.
+INFO     root:set_personal_info.py:47 Foreign Language completed successfully.
+INFO     root:set_personal_info.py:47 Activity completed successfully.
+INFO     root:set_personal_info.py:47 Working Experience completed successfully.
+INFO     root:set_personal_info.py:47 Additional—Questionnair completed successfully.
+INFO     root:set_personal_info.py:47 Additional—Attachment completed successfully.
+INFO     root:set_personal_info.py:47 Additional—PTKP completed successfully.
 PASSED
 
-============================== 1 passed in 47.12s ==============================
+============================== 1 passed in 30.12s ==============================
 ```
 
 ---
@@ -120,5 +115,4 @@ PASSED
 - Static test data is loaded from static_data.json.
 - Execution time may vary depending on environment performance.
 - NPWP setup runs in a separate browser session (HR role).
-
-docker image ls
+- Repeat the [Docker Setup](#-docker-setup--execution) after changing the code.

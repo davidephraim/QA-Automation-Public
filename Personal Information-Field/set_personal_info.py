@@ -118,7 +118,7 @@ def set_npwp(browser, env, name):
 
     confirm(hr_page)
 
-    log_step(hr_page, "npwp")
+    log_step(hr_page, "Set NPWP by HR")
 
     hr_context.close()
 
@@ -156,7 +156,7 @@ def set_general_personal(page, name):
     page.get_by_role("button", name="Save").click()
     confirm(page)
     
-    log_step(page, "general_personal")
+    log_step(page, "General—Personal")
 
 
 # ================= GENERAL FAMILY =================
@@ -187,7 +187,7 @@ def set_general_family(page):
     page.get_by_role("button", name="Create").click()
     confirm(page)
 
-    log_step(page, "family")
+    log_step(page, "General—Family")
 
 
 # ================= EDUCATION FORMAL & INFORMAL =================
@@ -209,7 +209,7 @@ def set_education_formal_informal(page):
     page.get_by_role("button", name="Create").click()
     confirm(page)
     
-    log_step(page, "formal education")
+    log_step(page, "Education—Formal & Informal")
 
 
 # ================= EDUCATION COURSE TRAINING =================
@@ -226,7 +226,7 @@ def set_education_course_training(page):
     page.get_by_role("button", name="Create").click()
     confirm(page)
     
-    log_step(page, "informal education")
+    log_step(page, "Education—Course")
 
 
 # ================= FOREIGN LANGUAGE =================
@@ -241,7 +241,7 @@ def set_foreign_language(page):
     page.get_by_role("button", name="Add +").click()
     confirm(page)
     
-    log_step(page, "foreign lang")
+    log_step(page, "Foreign Language")
 
 
 # ================= ACTIVITY =================
@@ -256,7 +256,7 @@ def set_activity(page):
     page.get_by_role("button", name="Save Changes").click()
     confirm(page)
     
-    log_step(page, "activity")
+    log_step(page, "Activity")
 
 
 # ================= WORKING EXPERIENCE =================
@@ -281,7 +281,7 @@ def set_working_experience(page):
     page.get_by_role("button", name="Add +").click()
     confirm(page)
     
-    log_step(page, "working")
+    log_step(page, "Working Experience")
 
 
 # ================= ADDITIONAL QUESTIONNAIR =================
@@ -297,7 +297,7 @@ def set_additional_questionnair(page):
     page.get_by_role("button", name="Confirm").click()
     page.get_by_role("link", name="Close").click()
     
-    log_step(page, "questionnair")
+    log_step(page, "Additional—Questionnair")
 
 
 # ================= ADDITIONAL ATTACHMENT =================
@@ -318,7 +318,7 @@ def set_attachment(page):
     page.get_by_role("button", name="Confirm").click()
     page.get_by_role("link", name="Close").click()
     
-    log_step(page, "attachment")
+    log_step(page, "Additional—Attachment")
 
 
 # ================= ADDITIONAL PTKP STATUS =================
@@ -345,26 +345,23 @@ def set_ptkp_status(page):
     except TimeoutError:
         pass
     
-    log_step(page, "ptkp")
+    log_step(page, "Additional—PTKP")
     
     
 # ================= MERGE =================
 
 def employee_merge(browser, env, username, password, name):
+    # HR: Set NPWP
+    set_npwp(browser, env, name)
 
+    # Employee
     employee_context = browser.new_context()
     employee_page = employee_context.new_page()
 
     login_employee(employee_page, env, username, password)
 
     set_general_personal(employee_page, name)
-
-    # HR update NPWP
-    set_npwp(browser, env, name)
-
     set_general_family(employee_page)
-
-    # tambahkan
     set_education_formal_informal(employee_page)
     set_education_course_training(employee_page)
     set_foreign_language(employee_page)
@@ -380,7 +377,6 @@ def employee_merge(browser, env, username, password, name):
 # ================= TEST =================
 
 def test_set_profile(playwright: Playwright, env, username, password, name):
-
     browser = playwright.chromium.launch(
         headless=True,
 
