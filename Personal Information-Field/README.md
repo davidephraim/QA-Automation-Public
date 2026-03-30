@@ -35,15 +35,15 @@ It supports <b>multi-environment execution</b> and <b>dynamic credentials via CL
 ```
 Personal Information-Field/
 │
-├── screenshots/                # Auto-generated screenshots
 ├── __pycache__/
 ├── .pytest_cache/
+├── screenshots/                # Auto-generated screenshots
 │
 ├── conftest.py                 # Pytest configuration & CLI options
 ├── local.py                    # Entry point for local execution (headed)
-├── set_personal_info.py        # Main automation script
-├── set_personal_info (old_ver).py
 ├── README.md
+├── set_personal_info (old_ver).py
+└── set_personal_info.py        # Main automation script
 ```
 
 <br>
@@ -154,4 +154,4 @@ PASSED
 - NPWP configuration is executed using a separate browser session (HR role).
 - Screenshot will be generated automatically for each completed step.
 - Execution duration may vary depending on environment performance.
-- Repeat the [Docker Setup](#1-build-docker-image) after changing the code.
+- Repeat the [Docker Setup](#-docker-setup) after changing the code.

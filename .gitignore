@@ -1,4 +1,9 @@
 credentials.json
-.hidden/
- Personal\ Information-Field/screenshot/**
+.hidden
+Personal\ Information-Field/screenshot/**
 !screenshot/.gitkeep
+.pytest_cache
+__pycache__
+*.pyc
+*.pyo
+*.pyd
