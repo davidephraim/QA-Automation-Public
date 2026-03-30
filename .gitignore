@@ -1,4 +1,4 @@
 credentials.json
 .hidden/
-screenshot/**
+ Personal\ Information-Field/screenshot/**
 !screenshot/.gitkeep
