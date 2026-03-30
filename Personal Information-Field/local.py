@@ -14,10 +14,10 @@ PROJECT_ROOT = BASE_DIR.parent
 CREDENTIAL_PATH = PROJECT_ROOT / "credentials.json"
 STATIC_PATH = PROJECT_ROOT / "static_data.json"
 
-with open(CREDENTIAL_PATH) as fc:
+with open(CREDENTIAL_PATH, 'r', encoding='utf-8') as fc:
     cred = json.load(fc)
 
-with open(STATIC_PATH) as fp:
+with open(STATIC_PATH, 'r', encoding='utf-8') as fp:
     stat = json.load(fp)
 
 # convert relative file path -> absolute
@@ -141,6 +141,7 @@ def company_regulation(page):
     
     log_step(page, "E-sign—company regulation")
     
+        
 # ================= GENERAL PERSONAL =================
 
 def set_general_personal(page, name):
@@ -310,10 +311,9 @@ def set_additional_questionnair(page):
     page.get_by_role("button", name="Edit").click()
     
     page.wait_for_timeout(500)
-    page.get_by_role("textbox").nth(0).fill(stat["string"]["text"])
-    
+    page.get_by_role("textbox").nth(0).fill("1")
     page.wait_for_timeout(500)
-    page.get_by_role("textbox").nth(1).fill(stat["string"]["text"])
+    page.get_by_role("textbox").nth(1).fill("2")
     
     page.get_by_role("button", name="Save Changes").click()
     page.get_by_role("button", name="Confirm").click()
@@ -398,15 +398,27 @@ def employee_merge(browser, env, username, password, name):
 
 # ================= TEST =================
 
-def test_set_profile(playwright: Playwright, env, username, password, name):
-    browser = playwright.chromium.launch(
-        headless=True,
+def test_set_profile(
+    playwright: Playwright,
+    env,
+    username,
+    password,
+    name,
+    headed: bool = True   # default headed for local use
+):
 
-        args=[
+    launch_args = {
+        "headless": not headed
+    }
+
+    # arg only for docker (optional)
+    if not headed:
+        launch_args["args"] = [
             "--disable-dev-shm-usage",
             "--no-sandbox"
         ]
-    )
+
+    browser = playwright.chromium.launch(**launch_args)
 
     employee_merge(
         browser,

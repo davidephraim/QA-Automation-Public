@@ -12,7 +12,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 CREDENTIAL_PATH = BASE_DIR / "credentials.json"
 STATIC_PATH = BASE_DIR / "static_data.json"
 
-with open(CREDENTIAL_PATH) as fc:
+with open (CREDENTIAL_PATH) as fc:
     cred = json.load(fc)
 
 with open (STATIC_PATH) as fp:

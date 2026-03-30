@@ -71,9 +71,7 @@ docker build -t playwright-space:set_personal_info .
 ```
 
 ### 2. Check docker image
-```bash
-docker image ls
-```
+```docker image ls``` <b>or</b> ```bash docker images ```
 
 ### 3. Code execution
 ```bash
@@ -89,10 +87,11 @@ pytest -s --log-cli-level=INFO "Personal Information-Field/set_personal_info.py"
 
 ## 📊 Sample Output
 ```bash
-Personal Information-Field/set_personal_info.py::test_set_profile 
+Personal Information-Field/set_personal_info.py::test_set_profile
 
 -------------------------------- live log call ---------------------------------
 INFO     root:set_personal_info.py:47 Set NPWP by HR completed successfully.
+INFO     root:set_personal_info.py:47 E-sign—company regulation completed successfully.
 INFO     root:set_personal_info.py:47 General—Personal completed successfully.
 INFO     root:set_personal_info.py:47 General—Family completed successfully.
 INFO     root:set_personal_info.py:47 Education—Formal & Informal completed successfully.
@@ -105,7 +104,7 @@ INFO     root:set_personal_info.py:47 Additional—Attachment completed successf
 INFO     root:set_personal_info.py:47 Additional—PTKP completed successfully.
 PASSED
 
-============================== 1 passed in 30.12s ==============================
+============================== 1 passed in 37.60s ==============================
 ```
 
 ---
