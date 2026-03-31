@@ -6,7 +6,7 @@ PROJECT_ROOT = BASE_DIR.parent.parent
 
 CREDENTIAL_PATH = PROJECT_ROOT / "credentials.json"
 
-with open(CREDENTIAL_PATH) as fc:
+with open(CREDENTIAL_PATH, 'r', encoding='utf-8') as fc:
     cred = json.load(fc)
 
 
