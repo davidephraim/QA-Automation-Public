@@ -22,11 +22,11 @@ with open(STATIC_PATH, 'r', encoding='utf-8') as fp:
 
 # convert relative file path -> absolute
 stat["file"]["img"] = str(
-    PROJECT_ROOT / stat["file"]["img"]
+    PROJECT_ROOT / stat["file"]["img_1"]
 )
 
 stat["file"]["pdf"] = str(
-    PROJECT_ROOT / stat["file"]["pdf"]
+    PROJECT_ROOT / stat["file"]["pdf_1"]
 )
 
 
@@ -102,10 +102,9 @@ def confirm(page):
     page.get_by_role("link", name="OK").click()
 
 
-# ================= SET NPWP =================
+# ================= SET SUPPORT INFORMATION =================
 
-def set_npwp(browser, env, name):
-
+def set_support_info(browser, env, name):
     hr_context = browser.new_context()
     hr_page = hr_context.new_page()
 
@@ -113,22 +112,46 @@ def set_npwp(browser, env, name):
 
     hr_page.locator("input.search").fill(name)
     hr_page.locator(".icon-crud-family").nth(0).click()
-
     hr_page.get_by_role("link", name="Supporting Information").click()
-    hr_page.get_by_text("NPWP").click()
 
+    # set 2 second wait
+    hr_page.wait_for_timeout(2000)
+
+    set_bank_account(hr_page, name)
+
+    # set 2 second wait
+    hr_page.wait_for_timeout(2000)
+
+    set_npwp(hr_page)
+    
+    hr_context.close()
+    
+
+# ================= SET BANK ACCOUNT =================
+
+def set_bank_account(hr_page, name):
     hr_page.get_by_role("button", name="Add").click()
-    hr_page.get_by_role("textbox").fill(stat["string"]["number"]["long"])
-
+    hr_page.locator("input[name=\"bank_name\"]").fill(stat["string"]["text"])
+    hr_page.locator("input[name=\"bank_account_number\"]").fill(stat["string"]["number"]["long"])
+    hr_page.locator("input[name=\"bank_account_name\"]").fill(name)
     hr_page.get_by_role("button", name="Add +").click()
 
     confirm(hr_page)
+    log_step(hr_page, "Set Bank Account by HR")
+    
+    
+# ================= SET NPWP =================
 
+def set_npwp(hr_page):  
+    hr_page.get_by_text("NPWP").click()
+    hr_page.get_by_role("button", name="Add").click()
+    hr_page.get_by_role("textbox").fill(stat["string"]["number"]["long"])
+    hr_page.get_by_role("button", name="Add +").click()
+    
+    confirm(hr_page)
     log_step(hr_page, "Set NPWP by HR")
-
-    hr_context.close()
-
-
+    
+    
 # ================= COMPANY REGULATION =================
 
 def company_regulation(page):
@@ -374,7 +397,7 @@ def set_ptkp_status(page):
 
 def employee_merge(browser, env, username, password, name):
     # HR: Set NPWP
-    set_npwp(browser, env, name)
+    set_support_info(browser, env, name)
 
     # Employee
     employee_context = browser.new_context()

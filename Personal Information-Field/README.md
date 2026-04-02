@@ -74,12 +74,12 @@ Covers full workflow:
 ---
 
 ## 🚀 Setup & Execution Guide
-This project can be run using `Docker` and `local` by install all libraries on Virtual Environment (`venv`). Follow the steps below to set it up:
+“This project can be run using `Docker` or locally by installing all dependencies in a virtual environment (`venv`). Follow the steps below to set it up:”
 
 ### 🐳 Docker Setup
 #### 1. Build docker image
 ```bash
-docker build -t playwright-space:set_personal_info .
+docker build -t playwright-space .
 ```
 
 #### 2. Verify Docker image
@@ -131,6 +131,7 @@ pytest -s --log-cli-level=INFO "Personal Information-Field/local.py" \
 Personal Information-Field/set_personal_info.py::test_set_profile
 
 -------------------------------- live log call ---------------------------------
+INFO     root:set_personal_info.py:47 Set Bank Account by HR completed successfully.
 INFO     root:set_personal_info.py:47 Set NPWP by HR completed successfully.
 INFO     root:set_personal_info.py:47 E-sign—company regulation completed successfully.
 INFO     root:set_personal_info.py:47 General—Personal completed successfully.
@@ -145,7 +146,7 @@ INFO     root:set_personal_info.py:47 Additional—Attachment completed successf
 INFO     root:set_personal_info.py:47 Additional—PTKP completed successfully.
 PASSED
 
-============================== 1 passed in 37.60s ==============================
+======================== 1 passed in 124.13s (0:02:04) =========================
 ```
 ---
 ## 📌 Notes
@@ -153,5 +154,10 @@ PASSED
 - Static test data is loaded from `static_data.json`.
 - NPWP configuration is executed using a separate browser session (HR role).
 - Screenshot will be generated automatically for each completed step.
-- Execution duration may vary depending on environment performance.
+- Execution duration may vary or fail depending on the environment performance.
 - Repeat the [Docker Setup](#-docker-setup) after changing the code.
+
+---
+
+## 🤝 Contributing
+>🐛 Found an issue? Please open an issue or submit a pull request. Thank you so much 🫡.

@@ -9,8 +9,11 @@
     "special": "!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~"
   },
   "file": {
-    "img": "File_test/file_example_JPG_100kB.jpg",
-    "pdf": "File_test/file_example_PDF_150kB.pdf"
+    "img_1": "File_test/file_example_JPG_100kB.jpg",
+    "img_2": "File_test/file_example_JPG_2500kB.jpg",
+    "img_3": "File_test/file_example_JPG_18MB.jpg",
+    "pdf_1": "File_test/file_example_PDF_150kB.pdf",
+    "pdf_2": "File_test/file_example_PDF_20kB.pdf"
   },
   "date": "0001-01-01"
 }
