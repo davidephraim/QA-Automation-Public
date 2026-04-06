@@ -27,13 +27,6 @@ def pytest_addoption(parser):
         help="Employee password"
     )
 
-    parser.addoption(
-        "--name",
-        action="store",
-        default=None,
-        help="Employee name to search"
-    )
-
 
 # ================= FIXTURES =================
 
@@ -50,8 +43,3 @@ def username(request):
 @pytest.fixture(scope="session")
 def password(request):
     return request.config.getoption("--password")
-
-
-@pytest.fixture(scope="session")
-def name(request):
-    return request.config.getoption("--name")

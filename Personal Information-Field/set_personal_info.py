@@ -151,11 +151,36 @@ def set_npwp(hr_page):
     confirm(hr_page)
     log_step(hr_page, "Set NPWP by HR")
 
+    
+# ================= GET NAME =================
 
+def get_employee_name(browser, env, username, password):
+    context = browser.new_context()
+    page = context.new_page()
+
+    login_employee(page, env, username, password)
+    
+    company_regulation(page)
+    
+    name = page.locator('input[name="full_name"]').input_value()
+
+    log_step(page, "Get Employee Name")
+    context.close()
+
+    return name
+    
+    
 # ================= COMPANY REGULATION =================
 
 def company_regulation(page):
-    page.get_by_role("checkbox").click()
+    checkboxes = page.get_by_role("checkbox")
+    count = checkboxes.count()
+
+    if count == 0 or count > 3:
+        print(f"Skip company regulation - checkbox count: {count}")
+        return
+    
+    checkboxes.click()
     page.locator("canvas").click(position={"x":357,"y":59})
     page.get_by_role("button", name="Submit Signature").click()
     page.get_by_role("button", name="Submit Approval").click()
@@ -167,7 +192,6 @@ def company_regulation(page):
 # ================= GENERAL PERSONAL =================
 
 def set_general_personal(page, name):
-    page.locator("input[name=\"full_name\"]").fill(name)
     page.locator("input[name=\"nick_name\"]").fill(name)
 
     page.locator("textarea[name=\"address\"]").fill(stat["string"]["text"])
@@ -395,11 +419,20 @@ def set_ptkp_status(page):
     
 # ================= MERGE =================
 
-def employee_merge(browser, env, username, password, name):
-    # HR: Set NPWP
+def employee_merge(browser, env, username, password):
+    
+    
+    # ================= STEP 1: GET NAME FROM EMPLOYEE =================
+    name = get_employee_name(browser, env, username, password)
+
+    logging.info(f"Employee name detected: {name}")
+    
+    
+    # ================= STEP 2: HR SET SUPPORT INFO =================
     set_support_info(browser, env, name)
 
-    # Employee
+    
+    # ================= STEP 3: EMPLOYEE COMPLETE PROFILE =================
     employee_context = browser.new_context()
     employee_page = employee_context.new_page()
 
@@ -421,7 +454,7 @@ def employee_merge(browser, env, username, password, name):
 
 # ================= TEST =================
 
-def test_set_profile(playwright: Playwright, env, username, password, name):
+def test_set_profile(playwright: Playwright, env, username, password):
     browser = playwright.chromium.launch(
         headless=True,
 
@@ -436,7 +469,6 @@ def test_set_profile(playwright: Playwright, env, username, password, name):
         env,
         username,
         password,
-        name
     )
 
     browser.close()

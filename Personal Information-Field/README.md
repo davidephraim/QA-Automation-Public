@@ -69,7 +69,6 @@ Covers full workflow:
 | `--env`          | Target environment (`dev`, `stg`) |
 | `--username`     | User login email                  |
 | `--password`     | User password                     |
-| `--name`         | User full name                    |
 
 ---
 
@@ -91,8 +90,7 @@ docker run --rm <IMG_ID> \
 pytest -s --log-cli-level=INFO "Personal Information-Field/set_personal_info.py" \ 
 --env=<ENVIRONMENT> \
 --username=<USER_EMAIL> \
---password=<USER_PASSWD> \
---name=<USER_NAME>
+--password=<USER_PASSWD>
 ```
 
 ---
@@ -120,20 +118,23 @@ pip install -r requirements.txt
 pytest -s --log-cli-level=INFO "Personal Information-Field/local.py" \
 --env=<ENVIRONMENT> \
 --username=<USER_EMAIL> \
---password=<USER_PASSWD> \
---name=<USER_NAME>
+--password=<USER_PASSWD>
 ```
 
 <br>
 
 ## 📊 Sample Output
+### Docker 🐳
 ```bash
 Personal Information-Field/set_personal_info.py::test_set_profile
 
 -------------------------------- live log call ---------------------------------
+INFO     root:set_personal_info.py:47 E-sign—company regulation completed successfully.
+Skip company regulation - checkbox count: 0
+INFO     root:set_personal_info.py:47 Get Employee Name completed successfully.
+INFO     root:set_personal_info.py:428 Employee name detected: Tongcai
 INFO     root:set_personal_info.py:47 Set Bank Account by HR completed successfully.
 INFO     root:set_personal_info.py:47 Set NPWP by HR completed successfully.
-INFO     root:set_personal_info.py:47 E-sign—company regulation completed successfully.
 INFO     root:set_personal_info.py:47 General—Personal completed successfully.
 INFO     root:set_personal_info.py:47 General—Family completed successfully.
 INFO     root:set_personal_info.py:47 Education—Formal & Informal completed successfully.
@@ -146,9 +147,37 @@ INFO     root:set_personal_info.py:47 Additional—Attachment completed successf
 INFO     root:set_personal_info.py:47 Additional—PTKP completed successfully.
 PASSED
 
-======================== 1 passed in 124.13s (0:02:04) =========================
+============================== 1 passed in 56.50s ==============================
 ```
+
+### Local 💻
+```bash
+Personal Information-Field/local.py::test_set_profile
+
+---------------------------------------------------- live log call ----------------------------------------------------
+INFO     root:local.py:47 E-sign—company regulation completed successfully.
+Skip company regulation - checkbox count: 0
+INFO     root:local.py:47 Get Employee Name completed successfully.
+INFO     root:local.py:428 Employee name detected: Caipo
+INFO     root:local.py:47 Set Bank Account by HR completed successfully.
+INFO     root:local.py:47 Set NPWP by HR completed successfully.
+INFO     root:local.py:47 General—Personal completed successfully.
+INFO     root:local.py:47 General—Family completed successfully.
+INFO     root:local.py:47 Education—Formal & Informal completed successfully.
+INFO     root:local.py:47 Education—Course completed successfully.
+INFO     root:local.py:47 Foreign Language completed successfully.
+INFO     root:local.py:47 Activity completed successfully.
+INFO     root:local.py:47 Working Experience completed successfully.
+INFO     root:local.py:47 Additional—Questionnair completed successfully.
+INFO     root:local.py:47 Additional—Attachment completed successfully.
+INFO     root:local.py:47 Additional—PTKP completed successfully.
+PASSED
+
+================================================= 1 passed in 57.30s ==================================================
+```
+
 ---
+
 ## 📌 Notes
 - Ensure valid credentials are configured in `credentials.json`.
 - Static test data is loaded from `static_data.json`.
@@ -156,7 +185,6 @@ PASSED
 - Screenshot will be generated automatically for each completed step.
 - Execution duration may vary or fail depending on the environment performance.
 - Repeat the [Docker Setup](#-docker-setup) after changing the code.
-
 ---
 
 ## 🤝 Contributing
