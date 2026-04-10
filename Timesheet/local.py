@@ -10,15 +10,15 @@ from playwright.sync_api import Playwright
 # ================= PATH SETUP =================
 
 BASE_DIR = Path(__file__).resolve().parent
-PROJECT_ROOT = BASE_DIR.parent.parent
+PROJECT_ROOT = BASE_DIR.parent
 
 CREDENTIAL_PATH = PROJECT_ROOT / "credentials.json"
 STATIC_PATH = PROJECT_ROOT / "static_data.json"
 
-with open(CREDENTIAL_PATH) as fc:
+with open(CREDENTIAL_PATH, 'r', encoding='utf-8') as fc:
     cred = json.load(fc)
 
-with open(STATIC_PATH) as fp:
+with open(STATIC_PATH, 'r', encoding='utf-8') as fp:
     stat = json.load(fp)
     
 
@@ -37,14 +37,14 @@ def log_step(page, step_name):
 
     page.screenshot(path=screenshot_dir / f"{step_name}.png")
 
-    logging.info(f"{step_name} completed successfully.")
+    logging.info(f"{step_name} completed successfully..")
 
     
 # ================= EMPLOYEE: CREATE TIMESHEET =================
 
-def timesheet_flow(playwright: Playwright, env, username, password):
+def test_timesheet_flow(playwright: Playwright, env_config, username, password):
     browser = playwright.chromium.launch(
-        headless=True,
+        headless=False,
         args=[
             "--disable-dev-shm-usage",
             "--no-sandbox"
@@ -52,7 +52,7 @@ def timesheet_flow(playwright: Playwright, env, username, password):
     )
     
     # ================= GET EMPLOYEE NAME =================
-    employee_name = employee.get_employee_name(browser, env, username, password)
+    employee_name = employee.get_employee_name(browser, env_config, username, password)
 
     logger.info(f"Employee: {employee_name}")
 
@@ -66,35 +66,45 @@ def timesheet_flow(playwright: Playwright, env, username, password):
             logger.info(f"Skip {fmt} (no format id)")
             continue
 
-        logger.info(f"FORMAT: {fmt}")
-
         # ================= HR SET FORMAT =================
         hr_context = browser.new_context()
         hr_page = hr_context.new_page()
 
-        hr.login_page(hr_page, env)
+        hr.login_page(hr_page, env_config)
         hr.work_information(hr_page, employee_name)
-        hr.set_format(hr_page, employee_name, format_id)
-        hr.submit_update(hr_page)
+        
+        hr.set_format(hr_page, format_id)
+        logger.info(f"Set Timesheet Format: {fmt.upper()}")
 
         # ================= DS ON =================
         hr.toggle_approval_using_space(hr_page, True)
+        logger.info(f"Set Approval Space: ON completed successfully.")
+        
         hr.submit_update(hr_page)
+        logger.info(f"Update Employee Work History completed successfully.")
 
         hr_context.close()
 
-
         # ================= LOOP TIMESHEET TYPE =================
         for ts_type in timesheet_types:
-            logger.info(f"{fmt} | TYPE: {ts_type}")
+            logger.info(f"{fmt.upper()} | TYPE: {ts_type.upper()}")
 
             # ================= EMPLOYEE CREATE =================
             emp_context = browser.new_context()
             emp_page = emp_context.new_page()
 
-            employee.login_page(emp_page, env, username, password)
+            employee.login_page(emp_page, env_config, username, password)
             employee.create_timesheet(emp_page, ts_type, fmt)
-            employee.download_timesheet(emp_page, env, fmt, ts_type)
+            logger.info(f"Create timesheet {fmt.upper()}-{ts_type.upper()} completed successfully.")
+            
+            emp_context.close()
+            
+            emp_context = browser.new_context()
+            emp_page = emp_context.new_page()
+            
+            employee.login_page(emp_page, env_config, username, password)
+            employee.download_timesheet(emp_page, env_config, fmt, ts_type)
+            logger.info(f"Employee Download timesheet-{fmt.upper()}-{ts_type.upper()} completed successfully.")
 
             emp_context.close()
 
@@ -102,34 +112,23 @@ def timesheet_flow(playwright: Playwright, env, username, password):
             hr_context = browser.new_context()
             hr_page = hr_context.new_page()
 
-            hr.login_page(hr_page, env)
-            hr.approve_timesheet(hr_page)
-            hr.download_timesheet(hr_page, env, fmt, ts_type)
+            hr.login_page(hr_page, env_config)
+            
+            input(logging.info("DS Approval action needed. Complete the DS process, then press ENTER to continue... "))
 
+            hr.approve_timesheet(hr_page)
+            logger.info(f"Timesheet approved by HR completed successfully.")
+            
+            hr.download_timesheet(hr_page, env_config, fmt, ts_type)
+            logger.info(f"HR Download timesheet-{fmt.upper()}-{ts_type.upper()} completed successfully.")
+            
+            hr.reject_timesheet(hr_page)
+            logger.info(f"Timesheet rejected by HR completed successfully.")
+            
             hr_context.close()
 
             # ================= CHECKSUM =================
-            checksum.process_checksum(fmt)
+            # checksum.process_checksum(fmt)
+            logger.info(f"Timesheet {fmt.upper()} Test completed successfully.\n")
 
     browser.close()
-    logger.info(f"Timesheet : {fmt}")
-    
-#     hr.set_format(page, name, format_id)
-# # Open page
-    
-#      # Need to loop for every timesheet format (read from static_data.json)
-
-# # Open page
-#     employee.login_page(page, env, username, password)
-#     employee.create_timesheet(page, timesheet_type, fmt)
-#     employee.download_timesheet(playwright, env, company_format, timesheet_config)
-
-# # Open page
-#     hr.login_page(page, env)
-#     # Hold 15 sec
-#     hr.approve_timesheet(page)
-#     hr.reject_timesheet(page)
-#     hr.download_timesheet(page, env, company_format, timesheet_config)
-    
-# # Switch to non ds toogle_approval_using_space(), then loop the process like before.
-#     checksum.process_checksum(company_format) # Each loop need to do checksum

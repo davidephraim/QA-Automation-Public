@@ -2,8 +2,8 @@
   "string": {
     "text": "Filled by Automation -D.",
     "number": {
-        "short": "1",
-        "long": "1234567890123456"
+      "short": "1",
+      "long": "1234567890123456"
     },
     "email": "a@a.a",
     "special": "!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~"
@@ -15,5 +15,41 @@
     "pdf_1": "File_test/file_example_PDF_150kB.pdf",
     "pdf_2": "File_test/file_example_PDF_20kB.pdf"
   },
-  "date": "0001-01-01"
+  "date": "0001-01-01",
+  "timesheet_format": {
+    "bri": {
+      "name": "BRI-Test",
+      "id": "15e09e2808c011f194b30242ac110003"
+    },
+    "cimb": {
+      "name": "CIMB-Test",
+      "id": "7b9ba40c0ae511f1aae10242ac110003"
+    },
+    "mandiri": {
+      "name": "Mandiri-Test",
+      "id": "445fd5b60c7b11f183970242ac110003"
+    },
+    "hypernet": {
+      "name": "Hypernet-Test",
+      "id": "0797393a16d011f1bf110242ac110003"
+    },
+    "mufg": {
+      "name": "MUFG-Test",
+      "id": "1c12a98c16c911f1b9f00242ac110003"
+    },
+    "nawadata": {
+      "name": "Nawadata-Test",
+      "id": "7087424c122e11f1a1040242ac110003"
+    },
+    "sigmatech": {
+      "name": "Sigmatech Format",
+      "id": ""
+    }
+  },
+  "timesheet_type": [
+    "full",
+    "halfh",
+    "halft",
+    "last"
+  ]
 }

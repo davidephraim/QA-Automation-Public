@@ -1,6 +1,7 @@
 import json
 import pytest
 from pathlib import Path
+from hr import approve_timesheet, reject_timesheet
 
 BASE_DIR = Path(__file__).resolve().parent
 HOLIDAY_PATH = BASE_DIR / "holiday_date.json"
@@ -54,6 +55,34 @@ def pytest_addoption(parser):
         default="sigmatech",
         help="Format: sigmatech, bri, cimb, mandiri, hypernet"
     )
+    
+    # ================= USERNAME =================
+    parser.addoption(
+        "--username",
+        action="store",
+        default=None,
+        help="Employee username (email)"
+    )
+
+    # ================= PASSWORD =================
+    parser.addoption(
+        "--password",
+        action="store",
+        default=None,
+        help="Employee password"
+    )
+
+
+# ================= ACCOUNT =================
+
+@pytest.fixture(scope="session")
+def username(request):
+    return request.config.getoption("--username")
+
+@pytest.fixture(scope="session")
+def password(request):
+    return request.config.getoption("--password")
+
 
 # ================= LEAVE FIXTURE =================
 
