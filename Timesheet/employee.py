@@ -36,7 +36,13 @@ def log_step(page, step_name):
     logging.info(f"{step_name} completed successfully.")    
     
     
-# ================= COMMON =================
+# ================= HELP =================
+
+def helper_dashboard(page):
+    page.get_by_role("link", name="Dashboard").click()
+    
+    
+# ================= CONFIRM =================
 
 def confirm(page):
     page.get_by_role("button", name="Confirm").click()
@@ -62,43 +68,58 @@ def login_page(page, env, username, password):
 
 def create_timesheet(page, timesheet_type, fmt):
 
-    page.get_by_role("link", name="Timesheet").click()
-    page.get_by_role("button", name="Add +").click()
+    while True:
+        helper_dashboard(page)
+        page.get_by_role("link", name="Timesheet").click()
+        page.get_by_role("button", name="Add +").click()
 
-    page.get_by_role("textbox", name="Select Date").first.click()
-    page.get_by_role("button", name="Choose February").click()
+        page.get_by_role("textbox", name="Select Date").first.click()
+        page.get_by_role("button", name="Choose February").click()
 
-    timesheet_map = {
-        "full": ("Sunday, February 1st,", "Saturday, February 28th,"),
-        "halfh": ("Sunday, February 1st,", "Saturday, February 14th,"),
-        "halft": ("Sunday, February 15th,", "Saturday, February 28th,"),
-        "last": ("Wednesday, February 25th,", "Saturday, February 28th,"),
-    }
+        timesheet_map = {
+            "full": ("Sunday, February 1st,", "Saturday, February 28th,"),
+            "halfh": ("Sunday, February 1st,", "Saturday, February 14th,"),
+            "halft": ("Sunday, February 15th,", "Saturday, February 28th,"),
+            "last": ("Wednesday, February 25th,", "Saturday, February 28th,"),
+        }
 
-    start_date, end_date = timesheet_map[timesheet_type]
+        start_date, end_date = timesheet_map[timesheet_type]
 
-    # START DATE
-    page.get_by_role("textbox", name="Select Date").nth(1).click()
-    page.get_by_role("button", name=f"Choose {start_date}").click()
+        # START DATE
+        page.get_by_role("textbox", name="Select Date").nth(1).click()
+        page.get_by_role("button", name=f"Choose {start_date}").click()
 
-    # END DATE
-    page.locator("input[name='end_date']").click()
-    page.get_by_role("button", name=f"Choose {end_date}").click()
+        # END DATE
+        page.locator("input[name='end_date']").click()
+        page.get_by_role("button", name=f"Choose {end_date}").click()
 
-    # SUBMIT
-    if fmt == "bri" or fmt == "cimb":
-        page.locator("input[name=\"custom_fields[0].value\"]").fill(f"{fmt.upper()} {stat['string']['text']}")
-    elif fmt == "mandiri":
-        page.locator("input[name=\"custom_fields[0].value\"]").fill(f"{fmt.upper()} 1 {stat['string']['text']}")
-        page.locator("input[name=\"custom_fields[1].value\"]").fill(f"{fmt.upper()} 2 {stat['string']['text']}")
-    elif fmt == "hypernet":
-        page.locator("input[name=\"custom_fields[0].value\"]").fill(f"{fmt.upper()} 1 {stat['string']['text']}")
-        page.locator("input[name=\"custom_fields[1].value\"]").fill(f"{fmt.upper()} 2 {stat['string']['text']}")
-        page.locator("input[name=\"custom_fields[2].value\"]").fill(f"{fmt.upper()} 3 {stat['string']['text']}")
-        page.locator("input[name=\"custom_fields[3].value\"]").fill(f"{fmt.upper()} 4 {stat['string']['text']}")
-        
-    page.get_by_role("button", name="Create").click()
-    page.get_by_role("link", name="Close").click()
+        # INPUT FIELD
+        if fmt in ["bri", "cimb"]:
+            page.locator("input[name=\"custom_fields[0].value\"]").fill(f"{fmt.upper()} {stat['string']['text']}")
+        elif fmt == "mandiri":
+            page.locator("input[name=\"custom_fields[0].value\"]").fill(f"{fmt.upper()} 1 {stat['string']['text']}")
+            page.locator("input[name=\"custom_fields[1].value\"]").fill(f"{fmt.upper()} 2 {stat['string']['text']}")
+        elif fmt == "hypernet":
+            for i in range(4):
+                page.locator(f"input[name=\"custom_fields[{i}].value\"]").fill(f"{fmt.upper()} {i+1} {stat['string']['text']}")
+
+        # CLICK CREATE
+        page.get_by_role("button", name="Create").click()
+
+        # CHECKING
+        invalid_popup = page.get_by_text("Invalid!")
+
+        try:
+            invalid_popup.wait_for(timeout=3000)
+            log_step(page, "Timesheet Existed. Reject timesheet using HR to retry")
+
+            input("Press ENTER to continue...")
+
+            page.get_by_role("link", name="Close").click()
+            continue
+        except:
+            page.get_by_role("link", name="Close").click()
+            break
         
 
 # ================= DOWNLOAD LATEST TIMESHEET =================
@@ -106,6 +127,7 @@ def create_timesheet(page, timesheet_type, fmt):
 def download_timesheet(page, env, fmt, timesheet_config):
 
     # DOWNLOAD TIMESHEET
+    helper_dashboard(page)
     page.get_by_role("link", name="Timesheet").click()
     page.locator("tbody tr").nth(0).locator("td").nth(0).click()
     page.locator(".icon-crud-family").nth(0).click()
@@ -119,7 +141,7 @@ def download_timesheet(page, env, fmt, timesheet_config):
 
     download = download_info.value
 
-    path = f"{BASE_DIR}/Downloaded_timesheet/employee/{fmt.upper()}/" + f"{env.upper()} - Employee - {fmt} - {timesheet_config} - {download.suggested_filename}"
+    path = f"{BASE_DIR}/Downloaded_timesheet/employee/{fmt.upper()}/" + f"{env.upper()} - Employee - {fmt.upper()} - {timesheet_config} - {download.suggested_filename}"
     download.save_as(path)
     
     

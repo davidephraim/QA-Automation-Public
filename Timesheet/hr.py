@@ -2,6 +2,7 @@
 
 import json
 from pathlib import Path
+import logging
 
 
 # ================= STATIC DIRECTORIES =================
@@ -28,6 +29,28 @@ stat["file"]["pdf"] = str(
 )
 
 
+# ================= LOGS =================
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s"
+)
+
+def log_step(page, step_name):
+    screenshot_dir = BASE_DIR / "screenshots"
+    screenshot_dir.mkdir(exist_ok=True)
+
+    page.screenshot(path=screenshot_dir / f"{step_name}.png")
+
+    logging.warning(f"{step_name}")
+    
+    
+# ================= HELP =================
+
+def helper_(page):
+    page.get_by_role("link", name="Employee").click()
+    
+    
 # ================= LOGIN =================
 
 def login_page(page, env):
@@ -43,14 +66,21 @@ def login_page(page, env):
     page.locator("a:has(p:has-text('Human Resource'))").click()
 
 
-# ================= APPROVE TIMESHEET =================
+# ================= TIMESHEET =================
 
-def approve_timesheet(page):
+def timesheet_skeleton(page):
+    helper_(page)
     page.get_by_role("link", name="Timesheet").click()
 
     page.reload(wait_until="load")
     
     page.locator("tr:first-child td:nth-child(4) a").click()
+    
+
+# ================= APPROVE TIMESHEET =================
+
+def approve_timesheet(page):
+    timesheet_skeleton(page)
     page.get_by_role("button", name="Approval").click()
 
     checkbox = page.get_by_placeholder("1").nth(0)
@@ -58,12 +88,23 @@ def approve_timesheet(page):
     checkbox.check()
 
     page.get_by_role("button", name="Send").click()
-    submit_stage(page)
+    page.get_by_role("button", name="Confirm").click()
+    
+    invalid_popup = page.get_by_text("Invalid!")
+        
+    try:
+        invalid_popup.wait_for(timeout=3000)
+        log_step(page, "Timesheet has been approved. Continue the process...")
+        page.get_by_role("link", name="OK").click()
+    except:
+        page.get_by_role("link", name="OK").click()
+        
 
 
 # ================= REJECT TIMESHEET =================
 
 def reject_timesheet(page):
+    timesheet_skeleton(page)
     page.get_by_role("button", name="Approval").click()
 
     reject_checkbox = page.get_by_placeholder("1").nth(1)
@@ -74,7 +115,16 @@ def reject_timesheet(page):
     comment_box.fill("Timesheet has been Rejected by Automation -D.")
 
     page.get_by_role("button", name="Send").click()
-    submit_stage(page)
+    page.get_by_role("button", name="Confirm").click()
+    
+    invalid_popup = page.get_by_text("Invalid!")
+    
+    try:
+        invalid_popup.wait_for(timeout=3000)
+        log_step(page, "Timesheet has been rejected. Continue the process...")
+        page.get_by_role("link", name="OK").click()
+    except:
+        page.get_by_role("link", name="OK").click()
 
 
 # ================= SUBMISSION =================
@@ -87,6 +137,8 @@ def submit_stage(page):
 # ================= DOWNLOAD TIMESHEET =================
 
 def download_timesheet(page, env, fmt, timesheet_config):
+    approve_timesheet(page)
+    timesheet_skeleton(page)
     page.locator(".icon-crud-family").nth(2).click()
 
     if fmt == "sigmatech":
@@ -98,7 +150,7 @@ def download_timesheet(page, env, fmt, timesheet_config):
 
     download = download_info.value
 
-    path = f"{BASE_DIR}/Downloaded_timesheet/hr/{fmt.upper()}/" + f"{env.upper()} - HR - {fmt} - {timesheet_config} - {download.suggested_filename}"
+    path = f"{BASE_DIR}/Downloaded_timesheet/hr/{fmt.upper()}/" + f"{env.upper()} - HR - {fmt.upper()} - {timesheet_config} - {download.suggested_filename}"
     download.save_as(path)
 
 

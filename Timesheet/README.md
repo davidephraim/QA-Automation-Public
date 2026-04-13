@@ -191,3 +191,7 @@ pytest hr\Cancel-Leave.py --env=<ENVIRONMENT> --leave=<LEAVE_TYPE>
 | `--headed`    | Run browser in UI mode             |
 | `--headless`  | Run browser in CLI mode            |
 | `--slowmo`    | Slow down execution (milliseconds) |
+
+```bash
+pytest -s --log-cli-level=INFO Timesheet\local.py --env= --username= --password= --headed
+```
