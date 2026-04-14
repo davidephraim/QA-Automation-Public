@@ -6,6 +6,7 @@ from pathlib import Path
 import employee, hr, checksum
 from playwright.sync_api import Playwright
 from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
+import shutil
 
 # ================= PATH SETUP =================
 
@@ -45,6 +46,46 @@ def log_step(page, step_name):
     page.screenshot(path=screenshot_dir / f"{step_name}.png")
 
     logging.info(f"{step_name} completed successfully..")
+    
+
+# ================= DOWNLOAD PATH =================
+
+DOWNLOAD_BASE = BASE_DIR / "Downloaded_timesheet" / "hr"
+
+
+# ================= CLEANSE DOWNLOAD DIR =================
+
+def clear_download_folder(path: Path):
+    if path.exists():
+        shutil.rmtree(path)
+    path.mkdir(parents=True, exist_ok=True)
+    
+    
+# ================= CHECKSUM =================
+
+def run_checksum(fmt, ts_type):
+    download_dir = BASE_DIR / "Downloaded_timesheet" / "hr" / fmt.upper()
+
+    latest_file = get_latest_file(download_dir)
+
+    static_pdf = Path(stat["file"]["pdf_1"])
+
+    result = checksum.compare_files(static_pdf, latest_file)
+
+    if result:
+        logger.info(f"CHECKSUM RESULT: PASS ({fmt}-{ts_type})")
+    else:
+        logger.error(f"CHECKSUM RESULT: FAILED ({fmt}-{ts_type})")
+        
+        
+# ================= GET LATEST FILE =================
+
+def get_latest_file(download_dir: Path):
+    files = list(download_dir.glob("*.pdf"))
+    if not files:
+        raise FileNotFoundError(f"No PDF found in {download_dir}")
+
+    return max(files, key=lambda f: f.stat().st_mtime)
 
     
 # ================= EMPLOYEE: CREATE TIMESHEET =================
@@ -77,168 +118,185 @@ def test_timesheet_flow(playwright: Playwright, env_config, username, password, 
             logger.info(f"Skip {fmt} (no format id)")
             continue
 
-        # ================= HR LOGIN =================
+            logger.info(f"========== START FORMAT: {fmt.upper()} ==========")
+
+        # ================= SET FORMAT + DS ON =================
         while True:
             try:
                 hr_context = browser.new_context()
                 hr_page = hr_context.new_page()
                 hr.login_page(hr_page, env_config)
-                break
-            except PlaywrightTimeoutError:
-                log_step(hr_page, f"timeout_hr_login")
-                wait_if_timeout(f"HR Login")
-                hr_context.close()
-                
-        while True:
-            try:
+
                 hr.work_information(hr_page, employee_name)
-                break
-            except PlaywrightTimeoutError:
-                log_step(hr_page, f"timeout_hr_work_information")
-                wait_if_timeout(f"HR Work Information")
-                
-        while True:
-            try:
                 hr.set_format(hr_page, format_id)
-                logger.info(f"Set Timesheet Format: {fmt.upper()}")
-                break
-            except PlaywrightTimeoutError:
-                log_step(hr_page, f"timeout_hr_set_format")
-                wait_if_timeout(f"HR Set format")
-                
 
-        # ================= DS ON =================
-        while True:
-            try:
-                hr.toggle_approval_using_space(hr_page, True)
-                logger.info(f"Set Approval Space: ON completed successfully.")
-                break
-            except PlaywrightTimeoutError:
-                log_step(hr_page, f"timeout_hr_approval_space")
-                wait_if_timeout(f"HR Approval using Space")
-        
-        while True:
-            try:
+                hr.toggle_approval_using_space(hr_page, True)  # DS ON
+                logger.info("DS ON")
+
                 hr.submit_update(hr_page)
-                logger.info(f"Update Employee Work History completed successfully.")
+                hr_context.close()
                 break
+
             except PlaywrightTimeoutError:
-                log_step(hr_page, f"timeout_hr_submit_update")
-                wait_if_timeout(f"HR sbmit update")
+                log_step(hr_page, f"timeout_hr_setup_{fmt}")
+                wait_if_timeout("HR Setup DS ON")
+                hr_context.close()
 
-        hr_context.close()
-
-        # ================= LOOP TIMESHEET TYPE =================
+        # ================= LOOP TIMESHEET (DS ON) =================
         for ts_type in timesheet_types:
-            logger.info(f"{fmt.upper()} | TYPE: {ts_type.upper()}")
+            logger.info(f"[DS ON] {fmt.upper()} | {ts_type.upper()}")
 
-            
-            # ================= EMPLOYEE CREATE TIMESHEET =================
-
-            # Emloyee Login
+            # ===== EMPLOYEE CREATE =====
             while True:
                 try:
                     emp_context = browser.new_context()
                     emp_page = emp_context.new_page()
                     employee.login_page(emp_page, env_config, username, password)
-                    break
-                except PlaywrightTimeoutError:
-                    log_step(emp_page, f"timeout_employee_login")
-                    wait_if_timeout(f"Employee Login")
-                    emp_context.close()
-            
-            # Employee Create Timesheet
-            while True:
-                try:
+
                     employee.create_timesheet(emp_page, ts_type, fmt)
-                    logger.info(f"Create timesheet {fmt.upper()}-{ts_type.upper()} completed successfully.")
+                    emp_context.close()
                     break
+
                 except PlaywrightTimeoutError:
-                    log_step(emp_page, f"timeout_employee_create{fmt}_{ts_type}")
-                    wait_if_timeout(f"Create Timesheet {fmt}-{ts_type}")
-            
-            emp_context.close()
-            
-            
-            # ================= EMPLOYEE DOWNLOAD TIMESHEET =================
-            
-            # Employee Login
+                    log_step(emp_page, f"timeout_create_{fmt}_{ts_type}")
+                    wait_if_timeout("Create Timesheet")
+                    emp_context.close()
+
+            # ===== EMPLOYEE DOWNLOAD =====
             while True:
                 try:
                     emp_context = browser.new_context()
                     emp_page = emp_context.new_page()
                     employee.login_page(emp_page, env_config, username, password)
-                    break
-                except PlaywrightTimeoutError:
-                    log_step(emp_page, f"timeout_employee_login")
-                    wait_if_timeout(f"Employee Login")
-                    emp_context.close()
-            
-            # Employee Timesheet Download
-            while True:
-                try:
+
                     employee.download_timesheet(emp_page, env_config, fmt, ts_type)
-                    logger.info(f"Employee Download timesheet-{fmt.upper()}-{ts_type.upper()} completed successfully.")
+                    emp_context.close()
                     break
+
                 except PlaywrightTimeoutError:
-                    log_step(emp_page, f"timeout_employee_download_{fmt}_{ts_type}")
-                    wait_if_timeout(f"Employee Download Timesheet")
+                    log_step(emp_page, f"timeout_download_{fmt}_{ts_type}")
+                    wait_if_timeout("Download Timesheet")
+                    emp_context.close()
 
-            emp_context.close()
-
-
-            # HR Login
+            # ===== HR TIMESHEET APPROVAL & DOWNLOAD =====
             while True:
                 try:
                     hr_context = browser.new_context()
                     hr_page = hr_context.new_page()
                     hr.login_page(hr_page, env_config)
-                    break
-                except PlaywrightTimeoutError:
-                    log_step(hr_page, f"timeout_hr_login")
-                    wait_if_timeout(f"HR Login")
-                    hr_context.close()
-            
-            # HR DS Approval wait
-            logger.info("DS Approval action needed. Complete the DS process, then press ENTER to continue...")
-            input("Press ENTER to continue...")
-            
-            # HR Timesheet approve
-            while True:
-                try:
-                    hr.approve_timesheet(hr_page)
-                    logger.info(f"Timesheet approved by HR completed successfully.")
-                    break
-                except PlaywrightTimeoutError:
-                    log_step(hr_page, f"timeout_hr_approval")
-                    wait_if_timeout(f"Timesheet approved")
-            
-            
-            # HR Timesheet Downlaod
-            while True:
-                try:
-                    hr.download_timesheet(hr_page, env_config, fmt, ts_type)
-                    logger.info(f"HR Download timesheet-{fmt.upper()}-{ts_type.upper()} completed successfully.")
-                    break
-                except PlaywrightTimeoutError:
-                    log_step(hr_page, f"timeout_hr_download_{fmt}_{ts_type}")
-                    wait_if_timeout(f"HR Download Timesheet")
-                    
-            
-            # HR Timesheet Reject
-            while True:
-                try:
-                    hr.reject_timesheet(hr_page)
-                    logger.info(f"Timesheet rejected by HR completed successfully.")
-                    break
-                except PlaywrightTimeoutError:
-                    log_step(hr_page, f"timeout_hr_reject_{fmt}_{ts_type}")
-                    wait_if_timeout(f"Timesheet rejected")
-            
-            hr_context.close()
 
-            # ================= CHECKSUM =================
-            # checksum.process_checksum(fmt)
-            logger.info(f"Timesheet {fmt.upper()} Test completed successfully.\n")
+                    input("Complete DS approval, then press ENTER...")
+
+                    hr.approve_timesheet(hr_page)
+                    hr.download_timesheet(hr_page, env_config, fmt, ts_type, True)
+
+                    hr_context.close()
+                    break
+
+                except PlaywrightTimeoutError:
+                    log_step(hr_page, f"timeout_hr_{fmt}_{ts_type}")
+                    wait_if_timeout("HR Approve & Download")
+                    hr_context.close()
+                    
+            # ===== HR TIMESHEET REJECT =====
+            while True:
+                try:
+                    hr_context = browser.new_context()
+                    hr_page = hr_context.new_page()
+                    hr.login_page(hr_page, env_config)
+            
+                    hr.reject_timesheet(hr_page)
+                    hr_context.close()
+                    break
+                except PlaywrightTimeoutError:
+                    log_step(hr_page, f"timeout_hr_{fmt}_{ts_type}")
+                    wait_if_timeout("HR Reject")
+                    
+
+        # ================= SET DS OFF =================
+        while True:
+            try:
+                hr_context = browser.new_context()
+                hr_page = hr_context.new_page()
+                hr.login_page(hr_page, env_config)
+
+                hr.work_information(hr_page, employee_name)
+
+                hr.toggle_approval_using_space(hr_page, False)  # DS OFF
+                logger.info("DS OFF")
+
+                hr.submit_update(hr_page)
+                hr_context.close()
+                break
+
+            except PlaywrightTimeoutError:
+                log_step(hr_page, f"timeout_ds_off_{fmt}")
+                wait_if_timeout("DS OFF Setup")
+                hr_context.close()
+
+        # ================= LOOP TIMESHEET (DS OFF + CHECKSUM) =================
+        for ts_type in timesheet_types:
+            logger.info(f"[DS OFF] {fmt.upper()} | {ts_type.upper()}")
+
+            # bersihin folder sebelum download
+            download_dir = BASE_DIR / "Downloaded_timesheet" / "hr" / fmt.upper()
+            clear_download_folder(download_dir)
+
+            # ===== EMPLOYEE CREATE =====
+            while True:
+                try:
+                    emp_context = browser.new_context()
+                    emp_page = emp_context.new_page()
+                    employee.login_page(emp_page, env_config, username, password)
+
+                    employee.create_timesheet(emp_page, ts_type, fmt)
+                    emp_context.close()
+                    break
+
+                except PlaywrightTimeoutError:
+                    log_step(emp_page, f"timeout_create_off_{fmt}_{ts_type}")
+                    wait_if_timeout("Create Timesheet")
+                    emp_context.close()
+
+            # ===== EMPLOYEE SEND WITHOUT DS =====
+            while True:
+                try:
+                    emp_context = browser.new_context()
+                    emp_page = emp_context.new_page()
+                    employee.login_page(emp_page, env_config, username, password)
+
+                    employee.without_ds(emp_page, stat["file"]["pdf_1"])
+                    emp_context.close()
+                    break
+
+                except PlaywrightTimeoutError:
+                    log_step(emp_page, f"timeout_without_ds_{fmt}_{ts_type}")
+                    wait_if_timeout("Without DS")
+                    emp_context.close()
+
+            # ===== HR APPROVE + DOWNLOAD =====
+            while True:
+                try:
+                    hr_context = browser.new_context()
+                    hr_page = hr_context.new_page()
+                    hr.login_page(hr_page, env_config)
+
+                    hr.approve_timesheet(hr_page)
+                    hr.download_timesheet(hr_page, env_config, fmt, ts_type, False)
+
+                    # CHECKSUM
+                    run_checksum(fmt, ts_type)
+
+                    hr.reject_timesheet(hr_page)
+
+                    hr_context.close()
+                    break
+
+                except PlaywrightTimeoutError:
+                    log_step(hr_page, f"timeout_hr_off_{fmt}_{ts_type}")
+                    wait_if_timeout("HR Process DS OFF")
+                    hr_context.close()
+
+        logger.info(f"========== END FORMAT: {fmt.upper()} ==========\n")
 
     browser.close()

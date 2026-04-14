@@ -136,12 +136,11 @@ def submit_stage(page):
 
 # ================= DOWNLOAD TIMESHEET =================
 
-def download_timesheet(page, env, fmt, timesheet_config):
-    approve_timesheet(page)
+def download_timesheet(page, env, fmt, timesheet_config, ds):
     timesheet_skeleton(page)
     page.locator(".icon-crud-family").nth(2).click()
 
-    if fmt == "sigmatech":
+    if fmt == "sigmatech" and ds == True:
         with page.expect_download() as download_info:
             page.get_by_text("Download Sigmatech's Format").click()
     else:

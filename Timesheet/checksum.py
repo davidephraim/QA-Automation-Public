@@ -1,4 +1,5 @@
 # ================= LIBRARY =================
+
 import hashlib
 from pathlib import Path
 import logging
@@ -7,7 +8,11 @@ logger = logging.getLogger(__name__)
 
 
 # ================= HASH FUNCTION =================
+
 def generate_hash(file_path: Path):
+    if not file_path.exists():
+        raise FileNotFoundError(f"File not found: {file_path}")
+    
     sha256 = hashlib.sha256()
 
     with open(file_path, "rb") as f:
@@ -18,6 +23,7 @@ def generate_hash(file_path: Path):
 
 
 # ================= COMPARE FUNCTION =================
+
 def compare_files(static_file: Path, downloaded_file: Path):
     static_hash = generate_hash(static_file)
     downloaded_hash = generate_hash(downloaded_file)

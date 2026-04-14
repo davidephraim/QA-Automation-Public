@@ -156,7 +156,6 @@ def get_employee_name(browser, env, username, password):
 
     login_page(page, env, username, password)
     
-    # name = page.locator(".wrap-role-main").inner_text()
     page.goto(link+"employee/profile")
     name = page.locator('input[name="full_name"]').input_value()
 
@@ -169,6 +168,7 @@ def get_employee_name(browser, env, username, password):
 # ================= WITHOUT DS =================
 
 def without_ds(page, file_path):
+    page.get_by_role("link", name="Timesheet").click()
     page.locator("tbody tr").nth(0).locator("td").nth(0).click()
     page.locator(".icon-crud-family").nth(0).click()
 
