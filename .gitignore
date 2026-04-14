@@ -6,4 +6,5 @@ venv/
 .pytest_cache/
 __pycache__/
 *.pyc
-Timesheet/Downloaded_timesheet/*
+Downloaded_timesheet/
+!Downloaded_timesheet/.gitkeep

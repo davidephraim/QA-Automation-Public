@@ -49,7 +49,7 @@ def log_step(page, step_name):
     
 # ================= EMPLOYEE: CREATE TIMESHEET =================
 
-def test_timesheet_flow(playwright: Playwright, env_config, username, password):
+def test_timesheet_flow(playwright: Playwright, env_config, username, password, company_format):
     browser = playwright.chromium.launch(
         headless=False,
         args=[
@@ -68,12 +68,14 @@ def test_timesheet_flow(playwright: Playwright, env_config, username, password):
 
     # ================= LOOP FORMAT =================
     for fmt, format_data in timesheet_formats.items():
+        # FILTER FORMAT
+        if company_format != "full" and fmt != company_format:
+            continue
+        
         format_id = format_data["id"]
         if not format_id:
             logger.info(f"Skip {fmt} (no format id)")
             continue
-
-
 
         # ================= HR LOGIN =================
         while True:

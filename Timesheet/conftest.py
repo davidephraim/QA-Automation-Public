@@ -52,8 +52,8 @@ def pytest_addoption(parser):
     parser.addoption(
         "--format",
         action="store",
-        default="sigmatech",
-        help="Format: sigmatech, bri, cimb, mandiri, hypernet"
+        default="full",
+        help="Format: sigmatech, bri, cimb, mandiri, hypernet, mufg"
     )
     
     # ================= USERNAME =================
@@ -162,7 +162,7 @@ def company_format(request):
 
     fmt = request.config.getoption("--format")
 
-    allowed = ["sigmatech", "bri", "cimb", "mandiri", "hypernet"]
+    allowed = ["full", "sigmatech", "bri", "cimb", "mandiri", "hypernet", "mufg"]
 
     if fmt not in allowed:
         raise ValueError(f"--format must be one of {allowed}")

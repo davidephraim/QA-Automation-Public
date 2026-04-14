@@ -102,6 +102,8 @@ def create_timesheet(page, timesheet_type, fmt):
         elif fmt == "hypernet":
             for i in range(4):
                 page.locator(f"input[name=\"custom_fields[{i}].value\"]").fill(f"{fmt.upper()} {i+1} {stat['string']['text']}")
+        elif fmt == "mufg":
+            page.locator("input[name=\"custom_fields[0].value\"]").fill(f"{fmt.upper()} {stat['string']['text']}")
 
         # CLICK CREATE
         page.get_by_role("button", name="Create").click()
@@ -162,3 +164,18 @@ def get_employee_name(browser, env, username, password):
     context.close()
 
     return name
+
+
+# ================= WITHOUT DS =================
+
+def without_ds(page, file_path):
+    page.locator("tbody tr").nth(0).locator("td").nth(0).click()
+    page.locator(".icon-crud-family").nth(0).click()
+
+    page.get_by_text("Send Approval").click()
+    page.get_by_role("button", name="Choose File").click()
+    page.locator("input[type='file']").set_input_files(file_path)
+
+    page.get_by_role("button", name="Send").click()
+    page.get_by_role("button", name="Confirm").click()
+    page.get_by_role("link", name="Close").click()

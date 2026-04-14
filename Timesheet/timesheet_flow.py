@@ -113,23 +113,3 @@ def timesheet_flow(playwright: Playwright, env, username, password):
 
     browser.close()
     logger.info(f"Timesheet : {fmt}")
-    
-#     hr.set_format(page, name, format_id)
-# # Open page
-    
-#      # Need to loop for every timesheet format (read from static_data.json)
-
-# # Open page
-#     employee.login_page(page, env, username, password)
-#     employee.create_timesheet(page, timesheet_type, fmt)
-#     employee.download_timesheet(playwright, env, company_format, timesheet_config)
-
-# # Open page
-#     hr.login_page(page, env)
-#     # Hold 15 sec
-#     hr.approve_timesheet(page)
-#     hr.reject_timesheet(page)
-#     hr.download_timesheet(page, env, company_format, timesheet_config)
-    
-# # Switch to non ds toogle_approval_using_space(), then loop the process like before.
-#     checksum.process_checksum(company_format) # Each loop need to do checksum
