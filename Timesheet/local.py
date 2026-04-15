@@ -6,7 +6,7 @@ from pathlib import Path
 import employee, hr, checksum
 from playwright.sync_api import Playwright
 from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
-import shutil
+
 
 # ================= PATH SETUP =================
 
@@ -47,19 +47,6 @@ def log_step(page, step_name):
 
     logging.info(f"{step_name} completed successfully..")
     
-
-# ================= DOWNLOAD PATH =================
-
-DOWNLOAD_BASE = BASE_DIR / "Downloaded_timesheet" / "hr"
-
-
-# ================= CLEANSE DOWNLOAD DIR =================
-
-def clear_download_folder(path: Path):
-    if path.exists():
-        shutil.rmtree(path)
-    path.mkdir(parents=True, exist_ok=True)
-    
     
 # ================= CHECKSUM =================
 
@@ -86,6 +73,33 @@ def get_latest_file(download_dir: Path):
         raise FileNotFoundError(f"No PDF found in {download_dir}")
 
     return max(files, key=lambda f: f.stat().st_mtime)
+
+
+# ================= GET LATEST FILE =================
+
+def rename_latest_file(download_dir: Path, mode: str):
+    latest_file = get_latest_file(download_dir)
+
+    original_name = latest_file.stem
+
+    if mode == "ds_on":
+        new_name = f"{original_name}.pdf"
+    else:
+        new_name = f"{original_name}_ds_off.pdf"
+
+    new_path = download_dir / new_name
+
+    counter = 1
+    while new_path.exists():
+        new_name = new_name.replace(".pdf", f"_{counter}.pdf")
+        new_path = download_dir / new_name
+        counter += 1
+
+    latest_file.rename(new_path)
+
+    logger.info(f"Renamed file to: {new_name}")
+
+    return new_path
 
     
 # ================= EMPLOYEE: CREATE TIMESHEET =================
@@ -190,6 +204,9 @@ def test_timesheet_flow(playwright: Playwright, env_config, username, password, 
                     hr.approve_timesheet(hr_page)
                     hr.download_timesheet(hr_page, env_config, fmt, ts_type, True)
 
+                    download_dir = BASE_DIR / "Downloaded_timesheet" / "hr" / fmt.upper()
+                    rename_latest_file(download_dir, "ds_on")
+
                     hr_context.close()
                     break
 
@@ -240,7 +257,6 @@ def test_timesheet_flow(playwright: Playwright, env_config, username, password, 
 
             # bersihin folder sebelum download
             download_dir = BASE_DIR / "Downloaded_timesheet" / "hr" / fmt.upper()
-            clear_download_folder(download_dir)
 
             # ===== EMPLOYEE CREATE =====
             while True:
@@ -283,6 +299,9 @@ def test_timesheet_flow(playwright: Playwright, env_config, username, password, 
 
                     hr.approve_timesheet(hr_page)
                     hr.download_timesheet(hr_page, env_config, fmt, ts_type, False)
+
+                    download_dir = BASE_DIR / "Downloaded_timesheet" / "hr" / fmt.upper()
+                    rename_latest_file(download_dir, "ds_off")
 
                     # CHECKSUM
                     run_checksum(fmt, ts_type)
