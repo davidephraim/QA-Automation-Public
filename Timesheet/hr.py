@@ -33,7 +33,7 @@ stat["file"]["pdf"] = str(
 
 logging.basicConfig(
     level=logging.INFO,
-    format="%(asctime)s - %(levelname)s - %(message)s"
+    format="%(levelname)s - %(message)s"
 )
 
 def log_step(page, step_name):

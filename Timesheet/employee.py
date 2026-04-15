@@ -24,7 +24,7 @@ with open(STATIC_PATH, 'r', encoding='utf-8') as fp:
 
 logging.basicConfig(
     level=logging.INFO,
-    format="%(asctime)s - %(levelname)s - %(message)s"
+    format="%(levelname)s - %(message)s"
 )
 
 def log_step(page, step_name):

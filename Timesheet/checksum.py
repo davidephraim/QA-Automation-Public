@@ -2,9 +2,6 @@
 
 import hashlib
 from pathlib import Path
-import logging
-
-logger = logging.getLogger(__name__)
 
 
 # ================= HASH FUNCTION =================
@@ -28,12 +25,7 @@ def compare_files(static_file: Path, downloaded_file: Path):
     static_hash = generate_hash(static_file)
     downloaded_hash = generate_hash(downloaded_file)
 
-    logger.info(f"Static Hash     : {static_hash}")
-    logger.info(f"Downloaded Hash : {downloaded_hash}")
-
     if static_hash == downloaded_hash:
-        logger.info("CHECKSUM PASSED")
         return True
     else:
-        logger.error("CHECKSUM FAILED")
         return False

@@ -6,3 +6,4 @@ node_modules/
 *.log
 venv/
 .pytest_cache/
+Downloaded_timesheet/
