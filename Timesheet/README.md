@@ -82,7 +82,7 @@ Covers full workflow:
 ---
 
 ## 🚀 Setup & Execution Guide
-“This project can be run using `Docker` or locally by installing all dependencies in a virtual environment (`venv`). Follow the steps below to set it up:”
+This project can be run using `Docker` or locally by installing all dependencies in a virtual environment (`venv`). Follow the steps below to set it up:
 
 ### 🐳 Docker Setup
 #### 1. Setup `credentials.json`
