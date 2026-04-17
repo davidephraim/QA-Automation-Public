@@ -11,9 +11,10 @@ This feature automates the process of setting or updating <b>employee personal i
 
 It supports <b>multi-environment execution</b> and <b>dynamic credentials via CLI parameters</b>, making it suitable for scalable automation workflows. <b>Built with:</b>
 
-![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
-![Playwright](https://img.shields.io/badge/-playwright-%232EAD33?style=for-the-badge&logo=playwright&logoColor=white)
-![Pytest](https://img.shields.io/badge/pytest-%23ffffff.svg?style=for-the-badge&logo=pytest&logoColor=2f9fe3)
+[![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)](https://www.python.org/)
+[![Playwright](https://img.shields.io/badge/-playwright-%232EAD33?style=for-the-badge&logo=playwright&logoColor=white)](https://playwright.dev/)
+[![Pytest](https://img.shields.io/badge/pytest-%23ffffff.svg?style=for-the-badge&logo=pytest&logoColor=2f9fe3)](https://docs.pytest.org/)
+[![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
 
 > 💡 Ideal for regression testing, onboarding simulation, and automated data setup.
 
@@ -44,15 +45,13 @@ It supports <b>multi-environment execution</b> and <b>dynamic credentials via CL
 ```
 Personal Information-Field/
 │
-├── __pycache__/
-├── .pytest_cache/
 ├── screenshots/                # Auto-generated screenshots
 │
 ├── conftest.py                 # Pytest configuration & CLI options
 ├── local.py                    # Entry point for local execution (headed)
 ├── README.md
 ├── set_personal_info (old_ver).py
-└── set_personal_info.py        # Main automation script
+└── set_personal_info.py        # Main automation script runs on Docker
 ```
 
 <br>
