@@ -1,10 +1,10 @@
 credentials.json
 .hidden/
-screenshots/
-# !screenshots/.gitkeep
+Timesheet/screenshots/**
+Timesheet/!screenshots/.gitkeep
 venv/
 .pytest_cache/
 __pycache__/
 *.pyc
-Downloaded_timesheet
-!Downloaded_timesheet/.gitkeep
+Timesheet/Downloaded_timesheet/**
+!Timesheet/Downloaded_timesheet/.gitkeep

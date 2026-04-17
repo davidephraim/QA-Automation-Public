@@ -1,3 +1,8 @@
+[![Contributors][contributors-shield]][contributors-url]
+[![Forks][forks-shield]][forks-url]
+[![Stargazers][stars-shield]][stars-url]
+[![Issues][issues-shield]][issues-url]
+[![LinkedIn][linkedin-shield]][linkedin-url]
 # 📌 Timesheet Flow
 
 ## 🧩 Overview
@@ -5,6 +10,11 @@
 This feature automates the process of setting or updating <b>timesheet format</b> and create timesheet through <b>end-to-end (E2E) automated tests</b> using Playwright + Pytest.
 
 It supports <b>multi-environment execution</b> and <b>dynamic credentials via CLI parameters</b>, making it suitable for scalable automation workflows.
+
+[![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)](https://www.python.org/)
+[![Playwright](https://img.shields.io/badge/-playwright-%232EAD33?style=for-the-badge&logo=playwright&logoColor=white)](https://playwright.dev/)
+[![Pytest](https://img.shields.io/badge/pytest-%23ffffff.svg?style=for-the-badge&logo=pytest&logoColor=2f9fe3)](https://docs.pytest.org/)
+[![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
 
 > 💡 Ideal for regression testing, onboarding simulation, and automated data setup.
 
@@ -36,7 +46,7 @@ It supports <b>multi-environment execution</b> and <b>dynamic credentials via CL
 Timesheet/
 ├── Downloaded_timesheet/
 │   ├── employee/
-│   └── hr
+│   └── hr/
 │
 ├── screenshots/                # Auto-generated screenshots
 │
@@ -47,8 +57,8 @@ Timesheet/
 ├── leave_date.json
 ├── local.py                    # Entry point for local execution (headed)
 ├── README.md
-├── timesheet_flow.py
-└── timesheet_format.json       # Main automation script
+├── timesheet_flow.py           # Main automation script runs on Docker
+└── timesheet_format.json
 ```
 <br>
 
@@ -59,7 +69,7 @@ Timesheet/
 Covers full workflow:
 
 1. HR sets employee timesheet format
-2. Employee create timesheet on 4 different periods
+2. Employee create timesheet on 4 different periods (Full, Halh, Halft, End)
 3. Employee download timesheet
 4. Wait for DS approval (DS on), auto checksum (DS off)
 5. HR Approve, download, reject timesheet.
@@ -82,7 +92,7 @@ Covers full workflow:
 ---
 
 ## 🚀 Setup & Execution Guide
-“This project can be run using `Docker` or locally by installing all dependencies in a virtual environment (`venv`). Follow the steps below to set it up:”
+This project can be run using `Docker` or locally by installing all dependencies in a virtual environment (`venv`). Follow the steps below to set it up:
 
 ### 🐳 Docker Setup
 #### 1. Setup `credentials.json`
@@ -136,7 +146,6 @@ pytest -s --log-cli-level=INFO "Timesheet/local.py" \
 --format=<TIMESHEET_FORMAT> \
 --username=<USER_EMAIL> \
 --password="<USER_PASSWD>"
---headed
 ```
 
 <br>
@@ -348,3 +357,18 @@ INFO     timesheet_flow:timesheet_flow.py:319 ========== END FORMAT: BRI =======
 
 ## 🤝 Contributing
 >🐛 Found an issue? Please open an issue or submit a pull request. Thank you so much 🫡.
+
+<!-- MARKDOWN LINKS & IMAGES -->
+<!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
+[contributors-shield]: https://img.shields.io/github/contributors/davidephraim/QA-Automation-Public.svg?style=for-the-badge
+[contributors-url]: https://github.com/davidephraim/QA-Automation-Public/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/davidephraim/QA-Automation-Public.svg?style=for-the-badge
+[forks-url]: https://github.com/davidephraim/QA-Automation-Public/network/members
+[stars-shield]: https://img.shields.io/github/stars/davidephraim/QA-Automation-Public.svg?style=for-the-badge
+[stars-url]: https://github.com/davidephraim/QA-Automation-Public/stargazers
+[issues-shield]: https://img.shields.io/github/issues/davidephraim/QA-Automation-Public.svg?style=for-the-badge
+[issues-url]: https://github.com/davidephraim/QA-Automation-Public/issues
+[linkedin-shield]: https://img.shields.io/badge/linkedin-%230077B5.svg?style=for-the-badge&logo=linkedin&logoColor=white
+[linkedin-url]: https://linkedin.com/in/david--ephraim/
+<!-- Shields.io badges. You can a comprehensive list with many more badges at: https://github.com/inttter/md-badges -->
+<!-- https://github.com/Ileriayo/markdown-badges -->

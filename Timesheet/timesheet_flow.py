@@ -4,8 +4,7 @@ import json
 import logging
 from pathlib import Path
 import employee, hr, checksum
-from playwright.sync_api import Playwright
-from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
+from playwright.sync_api import Playwright, TimeoutError as PlaywrightTimeoutError
 
 
 # ================= PATH SETUP =================
