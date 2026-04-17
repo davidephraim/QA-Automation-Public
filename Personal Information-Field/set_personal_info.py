@@ -2,7 +2,7 @@
 
 import json
 from pathlib import Path
-from playwright.sync_api import Playwright, TimeoutError
+from playwright.sync_api import Playwright, TimeoutError as PlaywrightTimeoutError
 import logging
 
 
@@ -14,10 +14,10 @@ PROJECT_ROOT = BASE_DIR.parent
 CREDENTIAL_PATH = PROJECT_ROOT / "credentials.json"
 STATIC_PATH = PROJECT_ROOT / "static_data.json"
 
-with open(CREDENTIAL_PATH) as fc:
+with open(CREDENTIAL_PATH, 'r', encoding='utf-8') as fc:
     cred = json.load(fc)
 
-with open(STATIC_PATH) as fp:
+with open(STATIC_PATH, 'r', encoding='utf-8') as fp:
     stat = json.load(fp)
 
 # convert relative file path -> absolute
@@ -32,12 +32,6 @@ stat["file"]["pdf"] = str(
 
 # ================= LOGS =================
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(levelname)s - %(message)s"
-)
-
-
 def log_step(page, step_name):
     screenshot_dir = BASE_DIR / "screenshots"
     screenshot_dir.mkdir(exist_ok=True)
@@ -45,6 +39,13 @@ def log_step(page, step_name):
     page.screenshot(path=screenshot_dir / f"{step_name}.png")
 
     logging.info(f"{step_name} completed successfully.")
+
+
+# ================= TIMEOUT HANDLER =================
+
+def wait_if_timeout(step_name):
+    logging.warning(f"Timeout after 30s at step: {step_name}")
+    input("Server is full. Make sure server is normal, then press ENTER to continue...")
 
 
 # ================= LOGIN HR =================
@@ -62,7 +63,7 @@ def login_hr(page, env):
 
     try:
         page.get_by_text("OK").click(timeout=5000)
-    except TimeoutError:
+    except PlaywrightTimeoutError:
         pass
 
     page.locator("a:has(p:has-text('Human Resource'))").click()
@@ -81,14 +82,14 @@ def login_employee(page, env, username, password):
     page.get_by_role("button", name="Submit").click()
 
     try:
-        page.get_by_text("OK").click(timeout=5000)
-    except TimeoutError:
+        page.get_by_text("OK", exact=True).click(timeout=5000)
+    except PlaywrightTimeoutError:
         pass
 
     try:
         page.locator("text=Company Regulation Approval").wait_for(timeout=2000)
         company_regulation(page)
-    except TimeoutError:
+    except PlaywrightTimeoutError:
         pass
 
     page.locator(".wrap-role").click()
@@ -111,17 +112,27 @@ def set_support_info(browser, env, name):
     login_hr(hr_page, env)
 
     hr_page.locator("input.search").fill(name)
+    
+    # set 1 second wait
+    hr_page.wait_for_timeout(1000)
+    
+    if hr_page.get_by_text("There is no data to display yet.", exact=True).is_visible():
+        hr_page.get_by_text("Inactive", exact=True).click()
+        hr_page.locator("input.search").fill(name)
+        
+        hr_page.wait_for_timeout(1000)
+        
+        pass
+    
     hr_page.locator(".icon-crud-family").nth(0).click()
     hr_page.get_by_role("link", name="Supporting Information").click()
 
-    # set 2 second wait
-    hr_page.wait_for_timeout(2000)
-
+    # set 1 second wait
+    hr_page.wait_for_timeout(1000)
     set_bank_account(hr_page, name)
 
-    # set 2 second wait
-    hr_page.wait_for_timeout(2000)
-
+    # set 1 second wait
+    hr_page.wait_for_timeout(1000)
     set_npwp(hr_page)
     
     hr_context.close()
@@ -150,7 +161,7 @@ def set_npwp(hr_page):
     
     confirm(hr_page)
     log_step(hr_page, "Set NPWP by HR")
-
+    
     
 # ================= GET NAME =================
 
@@ -184,11 +195,11 @@ def company_regulation(page):
     page.locator("canvas").click(position={"x":357,"y":59})
     page.get_by_role("button", name="Submit Signature").click()
     page.get_by_role("button", name="Submit Approval").click()
-    page.get_by_role("button", name="Confirm").click()
-    page.get_by_role("link", name="OK").click()
+    confirm(page)
     
     log_step(page, "E-sign—company regulation")
     
+        
 # ================= GENERAL PERSONAL =================
 
 def set_general_personal(page, name):
@@ -357,10 +368,9 @@ def set_additional_questionnair(page):
     page.get_by_role("button", name="Edit").click()
     
     page.wait_for_timeout(500)
-    page.get_by_role("textbox").nth(0).fill(stat["string"]["text"])
-    
+    page.get_by_role("textbox").nth(0).fill("1")
     page.wait_for_timeout(500)
-    page.get_by_role("textbox").nth(1).fill(stat["string"]["text"])
+    page.get_by_role("textbox").nth(1).fill("2")
     
     page.get_by_role("button", name="Save Changes").click()
     page.get_by_role("button", name="Confirm").click()
@@ -406,12 +416,12 @@ def set_ptkp_status(page):
     
     try:
         page.get_by_role("link", name="OK").click(timeout=3000)
-    except TimeoutError:
+    except PlaywrightTimeoutError:
         pass
 
     try:
         page.get_by_text("Confirm").click(timeout=3000)
-    except TimeoutError:
+    except PlaywrightTimeoutError:
         pass
     
     log_step(page, "Additional—PTKP")
@@ -420,36 +430,49 @@ def set_ptkp_status(page):
 # ================= MERGE =================
 
 def employee_merge(browser, env, username, password):
-    
-    
-    # ================= STEP 1: GET NAME FROM EMPLOYEE =================
-    name = get_employee_name(browser, env, username, password)
 
-    logging.info(f"Employee name detected: {name}")
+    # ================= STEP 1: GET NAME FROM EMPLOYEE =================
+    while True:
+        try:
+            name = get_employee_name(browser, env, username, password)
+
+            logging.info(f"Employee name detected: {name}")
+            break
+        except PlaywrightTimeoutError:
+            wait_if_timeout("get_employee_name")
     
     
     # ================= STEP 2: HR SET SUPPORT INFO =================
-    set_support_info(browser, env, name)
+    while True:
+        try:
+            set_support_info(browser, env, name)
+            break
+        except PlaywrightTimeoutError:
+            wait_if_timeout("set_support_info")
 
-    
-    # ================= STEP 3: EMPLOYEE COMPLETE PROFILE =================
-    employee_context = browser.new_context()
-    employee_page = employee_context.new_page()
+    while True:
+        try:
+            # ================= STEP 3: EMPLOYEE COMPLETE PROFILE =================
+            employee_context = browser.new_context()
+            employee_page = employee_context.new_page()
 
-    login_employee(employee_page, env, username, password)
+            login_employee(employee_page, env, username, password)
 
-    set_general_personal(employee_page, name)
-    set_general_family(employee_page)
-    set_education_formal_informal(employee_page)
-    set_education_course_training(employee_page)
-    set_foreign_language(employee_page)
-    set_activity(employee_page)
-    set_working_experience(employee_page)
-    set_additional_questionnair(employee_page)
-    set_attachment(employee_page)
-    set_ptkp_status(employee_page)
-
-    employee_context.close()
+            set_general_personal(employee_page, name)
+            set_general_family(employee_page)
+            set_education_formal_informal(employee_page)
+            set_education_course_training(employee_page)
+            set_foreign_language(employee_page)
+            set_activity(employee_page)
+            set_working_experience(employee_page)
+            set_additional_questionnair(employee_page)
+            set_attachment(employee_page)
+            set_ptkp_status(employee_page)
+        
+            employee_context.close()
+            break
+        except PlaywrightTimeoutError:
+            wait_if_timeout("Employee data completion process")
 
 
 # ================= TEST =================
@@ -464,11 +487,6 @@ def test_set_profile(playwright: Playwright, env, username, password):
         ]
     )
 
-    employee_merge(
-        browser,
-        env,
-        username,
-        password,
-    )
+    employee_merge(browser, env, username, password)
 
     browser.close()
