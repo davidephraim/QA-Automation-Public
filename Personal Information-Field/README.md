@@ -62,7 +62,7 @@ Personal Information-Field/
 
 Covers full workflow:
 
-1. HR sets NPWP
+1. HR sets NPWP, Bank Account, 
 2. Employee completes personal information
 3. Employee fills supporting data
 4. Employee uploads attachments
@@ -135,7 +135,8 @@ pip install -r requirements.txt
 pytest -s --log-cli-level=INFO "Personal Information-Field/local.py" \
 --env=<ENVIRONMENT> \
 --username=<USER_EMAIL> \
---password=<USER_PASSWD>
+--password=<USER_PASSWD> \
+--headed
 ```
 
 <br>
@@ -194,14 +195,13 @@ PASSED
 ## 📌 Notes
 - Ensure valid credentials are configured in `credentials.json`.
 - Static test data is loaded from `static_data.json`.
-- NPWP configuration is executed using a separate browser session (HR role).
 - Screenshot will be generated automatically for each completed step.
-- Execution duration may vary or fail depending on the environment performance.
+- Execution duration may vary depending on the environment performance.
 - Repeat the [Docker Setup](#-docker-setup) after changing the code.
 ---
 
 ## 🤝 Contributing
->🐛 Found an issue? Please open an issue or submit a pull request. Thank you so much 🫡.
+>🐛 Found an issue? Please open an issue or submit a pull request. 多谢 🫡.
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
