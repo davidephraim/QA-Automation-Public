@@ -37,7 +37,7 @@ logging.basicConfig(
 )
 
 def log_step(page, step_name):
-    screenshot_dir = BASE_DIR / "screenshots"
+    screenshot_dir = BASE_DIR / "Downloaded_timesheet" / "screenshots"
     screenshot_dir.mkdir(exist_ok=True)
 
     page.screenshot(path=screenshot_dir / f"{step_name}.png")

@@ -107,14 +107,31 @@ docker build -t playwright-space .
 ```docker image ls``` <b>or</b> ```bash docker images ```
 
 #### 4. Run automation
+<details>
+  <summary><b>🐧SELinux Terminal</b></summary>
+
 ```bash
-docker run -it --rm <IMG_ID> \ 
-pytest -s --log-cli-level=INFO "Timesheet/timesheet_flow.py" \ 
---env=<ENVIRONMENT> \
---format=<TIMESHEET_FORMAT> \
---username=<USER_EMAIL> \
---password="<USER_PASSWD>"
+docker run -it --rm -v ${PWD}/Timesheet/Downloaded_timesheet:/app/Timesheet/Downloaded_timesheet:Z <IMG_ID> \
+  pytest -s --log-cli-level=INFO "Timesheet/timesheet_flow.py" \
+  --env=<ENVIRONMENT> \
+  --format=<TIMESHEET_FORMAT> \
+  --username=<USER_EMAIL> \
+  --password="<USER_PASSWD>"
 ```
+</details>
+
+<details>
+  <summary><b>🪟 Windows Powershell</b></summary>
+  
+```bash
+docker run -it --rm -v ${PWD}/Timesheet/Downloaded_timesheet:/app/Timesheet/Downloaded_timesheet <IMG_ID> \
+  pytest -s --log-cli-level=INFO "Timesheet/timesheet_flow.py" \
+  --env=<ENVIRONMENT> \
+  --format=<TIMESHEET_FORMAT> \
+  --username=<USER_EMAIL> \
+  --password="<USER_PASSWD>"
+```
+</details>
 
 ---
 
@@ -145,7 +162,8 @@ pytest -s --log-cli-level=INFO "Timesheet/local.py" \
 --env=<ENVIRONMENT> \
 --format=<TIMESHEET_FORMAT> \
 --username=<USER_EMAIL> \
---password="<USER_PASSWD>"
+--password="<USER_PASSWD>" \
+--headed
 ```
 
 <br>
@@ -351,7 +369,7 @@ INFO     timesheet_flow:timesheet_flow.py:319 ========== END FORMAT: BRI =======
 - Ensure valid credentials are configured in `credentials.json`.
 - Static test data is loaded from `static_data.json`.
 - Screenshot will be generated automatically for each completed step.
-- Execution duration may vary or fail depending on the environment performance.
+- Execution duration may vary depending on the environment performance.
 - Repeat the [Docker Setup](#-docker-setup) after changing the code.
 ---
 
