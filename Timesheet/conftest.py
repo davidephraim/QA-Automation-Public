@@ -72,6 +72,14 @@ def pytest_addoption(parser):
         help="Employee password"
     )
 
+    # ================= MONTH PERIOD =================
+    parser.addoption(
+        "--month",
+        action="store",
+        default="Mar",
+        help="Month Period: Feb or Mar"
+    )
+
 
 # ================= ACCOUNT =================
 
@@ -153,6 +161,21 @@ def action_config(request):
         raise ValueError("--action must be approve or reject")
 
     return actions[action]
+
+
+# ================= MONTH PERIOD FIXTURE =================
+
+@pytest.fixture
+def month_config(request):
+
+    month = request.config.getoption("--month")
+
+    allowed = ["Feb", "Mar"]
+    
+    if month not in months:
+        print("Default month is March. Using default value...")
+
+    return month
 
 
 # ================= FORMAT FIXTURE =================

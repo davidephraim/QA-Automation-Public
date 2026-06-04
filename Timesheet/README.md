@@ -48,7 +48,7 @@ Timesheet/
 │   ├── employee/
 │   └── hr/
 │
-├── screenshots/                # Auto-generated screenshots
+├── screenshots/                # Auto-generated dir: screenshots
 │
 ├── checksum.py
 ├── conftest.py                 # Pytest configuration & CLI options
@@ -116,7 +116,7 @@ docker run -it --rm -v ${PWD}/Timesheet/Downloaded_timesheet:/app/Timesheet/Down
   --env=<ENVIRONMENT> \
   --format=<TIMESHEET_FORMAT> \
   --username=<USER_EMAIL> \
-  --password="<USER_PASSWD>"
+  --password='<USER_PASSWD>'
 ```
 </details>
 

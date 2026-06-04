@@ -66,7 +66,7 @@ def login_page(page, env, username, password):
 
 # ================= CREATE TIMESHEET =================
 
-def create_timesheet(page, timesheet_type, fmt):
+def create_timesheet(page, timesheet_type, fmt, month):
 
     while True:
         helper_dashboard(page)
@@ -76,12 +76,20 @@ def create_timesheet(page, timesheet_type, fmt):
         page.get_by_role("textbox", name="Select Date").first.click()
         page.get_by_role("button", name="Choose February").click()
 
-        timesheet_map = {
-            "full": ("Sunday, February 1st,", "Saturday, February 28th,"),
-            "halfh": ("Sunday, February 1st,", "Saturday, February 14th,"),
-            "halft": ("Sunday, February 15th,", "Saturday, February 28th,"),
-            "last": ("Wednesday, February 25th,", "Saturday, February 28th,"),
-        }
+        if month == Feb:
+            timesheet_map = {
+                "full": ("Sunday, February 1st,", "Saturday, February 28th,"),
+                "halfh": ("Sunday, February 1st,", "Saturday, February 14th,"),
+                "halft": ("Sunday, February 15th,", "Saturday, February 28th,"),
+                "last": ("Wednesday, February 25th,", "Saturday, February 28th,"),
+            }
+        else:
+            timesheet_map = {
+                "full": ("Sunday, March 1st,", "Tuesday, March 31th,"),
+                "halfh": ("Sunday, March 1st,", "Saturday, March 14th,"),
+                "halft": ("Sunday, March 15th,", "Saturday, March 28th,"),
+                "last": ("Wednesday, March 25th,", "Tuesday, March 31th,"),
+            }
 
         start_date, end_date = timesheet_map[timesheet_type]
 

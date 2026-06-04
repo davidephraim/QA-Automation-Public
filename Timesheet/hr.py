@@ -190,6 +190,27 @@ def submit_update(page):
     submit_stage(page)
 
 
+# ================= REMOVE ATTENDANCE =================
+
+def rm_attendance(page, name):
+    page.get_by_role("link", name="Attendances").click()
+    page.locator("div").filter(has_text="Summary").click()
+    
+    page.locator("input.search").fill(name)
+    page.locator(".icon-crud-family").nth(7).click()
+    page.get_by_text("Attendance Log Summary").click()
+
+    page.locator('input[placeholder="Select Date"]').click()
+    page.get_by_text("June 2026").click()
+    page.get_by_role("button", name="Choose March 2026").click()
+
+    while page.locator("div.delete-btn").count() > 0:
+        page.locator("div.delete-btn").first.click()
+        page.wait_for_timeout(300)
+        page.get_by_role("button", name="Confirm").click()
+        page.get_by_role("button", name="OK").click()
+
+
 # ================= DS TOGGLE =================
 
 def toggle_approval_using_space(page, enable: bool):
