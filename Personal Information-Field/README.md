@@ -100,8 +100,8 @@ docker build -t playwright-space .
 
 #### 4. Run automation
 ```bash
-docker run -it --rm <IMG_ID> \ 
-pytest -s --log-cli-level=INFO "Personal Information-Field/set_personal_info.py" \ 
+docker run -it --rm <IMG_ID> \
+pytest -s --log-cli-level=INFO "Personal Information-Field/set_personal_info.py" \
 --env=<ENVIRONMENT> \
 --username=<USER_EMAIL> \
 --password=<USER_PASSWD>
