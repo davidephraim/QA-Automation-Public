@@ -24,6 +24,22 @@ It supports <b>multi-environment execution</b> and <b>dynamic credentials via CL
 
 **In Progress**—The automation is working for regular use, but some parts are still being improved. There's a known non-critical issue that will be fixed in a future update.
 
+**Notes**: The ideation for this part is creating the timesheet process start with 
+1. HR update Employee timesheet format ```[Done]```.
+2. Employee create request attendance on selected/default month based on timesheet format used ```[Not yet]```.
+3. Employee create timesheet on farious scenario based on selected month ```[Need adjustment]```.
+4. Inform DS about timesheet approval ```[Done]```.
+5. HR approve timesheet ```[Done]```.
+6. HR download timesheet ```[Done]```.
+7. Checksum downloaded timesheet with timesheet static data based on its format.
+8. HR reject timesheet ```[Done]```.
+9. HR remove Employee attendance on selected month ```[Not yet]```.
+10. HR change DS approval on to  off ```[Done]```.
+11. Loop until all the cases satisfied, then change the timesheet format ```[Done]```.
+
+**All of these steps shall be adjust, because there are fiew of steps not created yet and may be caused an error.** 
+<h5>If you want to contribute, you can fork then add update on your own local then do pull request.</h5>
+
 <br>
 
 ## ✨ Key Features
